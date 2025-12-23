@@ -1,0 +1,225 @@
+/**
+ * Settings Component
+ * Backup, restore, and about information
+ * Includes animations and transitions
+ */
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Download, Upload, Trash2, ShieldAlert, BadgeInfo, Save } from 'lucide-react';
+import { exportData, importData, clearAllData } from '../utils/storage';
+
+const Settings = ({ onNavigateDashboard }) => {
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [backupMessage, setBackupMessage] = useState('');
+
+  // Handle backup download
+  const handleBackup = () => {
+    const data = exportData();
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tododo-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setBackupMessage('✓ تم تحميل النسخة الاحتياطية بنجاح');
+    setTimeout(() => setBackupMessage(''), 3000);
+  };
+
+  // Handle restore from backup
+  const handleRestore = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+            if (importData(data)) {
+              setBackupMessage('✓ تم استعادة البيانات بنجاح');
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            }
+          } catch (error) {
+            setBackupMessage('✗ فشل في استعادة البيانات');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  // Handle clear all data
+  const handleClearAll = () => {
+    if (clearAllData()) {
+      setShowConfirmDelete(false);
+      setBackupMessage('✓ تم حذف جميع البيانات');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  };
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <div className="pt-safe-top sticky top-0 z-30">
+        <div className="absolute inset-0 glass border-b border-white/20" />
+        <div className="relative px-4 py-4 flex items-center justify-between">
+          <motion.button
+            onClick={onNavigateDashboard}
+            className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowRight size={24} />
+          </motion.button>
+          <h1 className="text-xl font-bold text-gray-800">الإعدادات</h1>
+          <div className="w-10" /> {/* Spacer */}
+        </div>
+      </div>
+
+      {/* Messages */}
+      {backupMessage && (
+        <motion.div
+          className="max-w-2xl mx-auto px-4 mt-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div className={`px-4 py-3 rounded-2xl flex items-center gap-2 ${backupMessage.includes('✓')
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-100 text-red-700'
+            }`}>
+            <span className="font-bold">{backupMessage}</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Settings Content */}
+      <motion.div
+        className="max-w-2xl mx-auto px-5 py-6 space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        {/* Backup & Restore Section */}
+        <motion.div
+          className="glass-card rounded-3xl p-6"
+          whileHover={{ y: -2 }}
+        >
+          <h2 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+            <Save className="text-primary" />
+            النسخ الاحتياطي والاستعادة
+          </h2>
+          <div className="space-y-3">
+            <motion.button
+              onClick={handleBackup}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download size={20} />
+              تحميل نسخة احتياطية
+            </motion.button>
+            <motion.button
+              onClick={handleRestore}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Upload size={20} />
+              استعادة من نسخة احتياطية
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* About Section */}
+        <motion.div
+          className="glass-card rounded-3xl p-6"
+          whileHover={{ y: -2 }}
+        >
+          <h2 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+            <BadgeInfo className="text-primary" />
+            عن التطبيق
+          </h2>
+          <div className="space-y-4 text-gray-600 leading-relaxed">
+            <p className="font-bold text-gray-900">تودو - تطبيق إدارة المهام الإسلامي</p>
+            <p>
+              تطبيق ويب تقدمي (PWA) يساعدك على إدارة مهامك اليومية مع التركيز على النيات والقصد الديني.
+            </p>
+            <div className="flex gap-4 text-sm bg-slate-50 p-4 rounded-2xl">
+              <div>
+                <strong>الإصدار:</strong><br />1.0.0
+              </div>
+              <div className="h-full w-px bg-gray-200" />
+              <div>
+                <strong>المطور:</strong><br />فريق جماليات
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Danger Zone */}
+        <motion.div
+          className="border border-red-100 rounded-3xl p-6 bg-red-50/50"
+        >
+          <h2 className="text-lg font-bold text-red-700 mb-2 flex items-center gap-2">
+            <ShieldAlert className="text-red-600" />
+            منطقة الخطر
+          </h2>
+          <p className="text-red-600/80 text-sm mb-6">
+            هذه الإجراءات لا يمكن التراجع عنها
+          </p>
+          {!showConfirmDelete ? (
+            <motion.button
+              onClick={() => setShowConfirmDelete(true)}
+              className="w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-4 px-4 rounded-2xl transition-colors duration-200 flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Trash2 size={20} />
+              حذف جميع البيانات
+            </motion.button>
+          ) : (
+            <motion.div
+              className="space-y-3"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <p className="font-bold text-center text-red-700 mb-2">هل أنت متأكد تماماً؟</p>
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={() => setShowConfirmDelete(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition-colors"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  إلغاء
+                </motion.button>
+                <motion.button
+                  onClick={handleClearAll}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  حذف
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Settings;
