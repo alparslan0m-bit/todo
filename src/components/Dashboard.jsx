@@ -1,10 +1,10 @@
 /**
  * Dashboard Component
- * Premium tasks view with physics-based elastic bounce (Apple native feel)
- * Phase 4: Category theme switching with applyCategoryTheme
+ * Premium tasks view with category theme switching
+ * Elastic bounce handled by global app shell (App.jsx)
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyCategoryTheme, resetTheme } from '../utils/dynamicTheme';
@@ -17,8 +17,6 @@ import {
   CheckCircle2,
   Filter,
 } from 'lucide-react';
-import { useGesture } from '@use-gesture/react';
-import { useHaptic } from '../hooks/useHaptic';
 import TaskCard from './TaskCard';
 import { useTaskContext } from '../context/TaskContext';
 
@@ -26,15 +24,9 @@ const CATEGORIES = ['عبادات', 'علم', 'عمل', 'أسرة', 'نفس', '�
 
 const Dashboard = ({ onShowModal }) => {
   const navigate = useNavigate();
-  const { triggerHaptic } = useHaptic();
   const { tasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [greeting, setGreeting] = useState({ text: 'صباح الخير', icon: Sun });
-  const [pullY, setPullY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef(null);
-  const maxStretch = 60; // Maximum stretch before haptic feedback
-  const resistanceFactor = 0.3; // Stretch 100px pull = 30px UI movement
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -42,43 +34,6 @@ const Dashboard = ({ onShowModal }) => {
     else if (hour < 17) setGreeting({ text: 'طاب يومك', icon: Sun });
     else setGreeting({ text: 'مساء الخير', icon: Moon });
   }, []);
-
-  // Physics-based elastic bounce gesture (Apple native feel)
-  const bind = useGesture({
-    onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
-      // Get the actual scrollable element (.page-wrapper)
-      const pageWrapper = containerRef.current?.closest('.page-wrapper');
-      const isAtTop = pageWrapper?.scrollTop === 0;
-      
-      // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
-      if (!isAtTop || dy < 0) {
-        cancel();
-        return;
-      }
-      
-      // Only allow pull-down when at top of scroll
-      if (isAtTop && dy > 0 && !last) {
-        // Prevent native scroll while gesture is active
-        event.preventDefault();
-        setIsDragging(true);
-        
-        // Apply resistance factor: pulling 100px only moves UI 30px
-        const stretchedY = Math.min(my * resistanceFactor, maxStretch);
-        setPullY(stretchedY);
-
-        // Haptic feedback at max stretch point
-        if (stretchedY >= maxStretch * 0.9) {
-          triggerHaptic(5); // Light impact
-        }
-      }
-
-      // On release, trigger spring animation back to zero
-      if (last) {
-        setIsDragging(false);
-        // Spring will handle the bounce-back via Framer Motion
-      }
-    },
-  });
 
   // Memoize filtered tasks for performance optimization
   const filteredTasks = useMemo(() =>
@@ -109,16 +64,8 @@ const Dashboard = ({ onShowModal }) => {
   const GreetingIcon = greeting.icon;
 
   return (
-    <div 
-      ref={containerRef}
-      className="px-4 py-4 pb-32 touch-action-pan-y"
-      {...bind()}
-    >
-      {/* Elastic bounce wrapper - Apple native physics */}
-      <motion.div
-        animate={{ y: !isDragging ? 0 : pullY }}
-        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
-      >
+    <div className="px-4 py-4 pb-32">
+      {/* Content wrapper - elastic bounce now handled by global app shell */}
       <header className="sticky top-0 z-30 pt-safe-top">
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-6 py-6 flex justify-between items-end">
@@ -253,7 +200,6 @@ const Dashboard = ({ onShowModal }) => {
           </motion.div>
         )}
       </main>
-      </motion.div>
     </div>
   );
 };

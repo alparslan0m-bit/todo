@@ -1,11 +1,13 @@
 /**
  * App Component
  * Main application component with routing and state management
+ * Global Elastic Bounce Shell: Universal Apple-native physics across all pages
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useGesture } from '@use-gesture/react';
 import Dashboard from './components/Dashboard';
 import AddTask from './components/AddTask';
 import Settings from './components/Settings';
@@ -15,6 +17,7 @@ import SplashScreen from './components/SplashScreen';
 import InstallPrompt from './components/InstallPrompt';
 import UpdateToast from './components/UpdateToast';
 import { TaskProvider } from './context/TaskContext';
+import { useHaptic } from './hooks/useHaptic';
 import { initializeStorage } from './utils/storage';
 import { initializeDynamicTheme, resetTheme } from './utils/dynamicTheme';
 import { initializeScrollAnimations, initializeRevealOnScroll } from './utils/scrollAnimations';
@@ -31,9 +34,59 @@ const ROUTE_DEPTH = {
 // Inner component that uses routing
 const AppContent = ({ showModal, setShowModal, appReady }) => {
   const location = useLocation();
+  const { triggerHaptic } = useHaptic();
   const [isMounted, setIsMounted] = useState(false);
   const [direction, setDirection] = useState(0);
   const [prevDepth, setPrevDepth] = useState(0);
+  const [pullY, setPullY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const appShellRef = useRef(null);
+
+  // Non-linear resistance curve: diminishing returns as you pull harder
+  const calculateResistance = (movement) => {
+    if (movement < 20) {
+      return movement * 1.0; // 0-20px: full movement
+    } else if (movement < 50) {
+      return 20 + (movement - 20) * 0.5; // 20-50px: half movement
+    } else {
+      return 35 + (movement - 50) * 0.2; // 50+px: 20% movement (max resistance)
+    }
+  };
+
+  // Global elastic bounce shell - works across all pages
+  const bind = useGesture({
+    onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
+      // Get the active page wrapper
+      const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
+      const isAtTop = pageWrapper?.scrollTop === 0;
+
+      // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
+      if (!isAtTop || dy < 0) {
+        cancel();
+        return;
+      }
+
+      // Only allow pull-down when at top of scroll across all pages
+      if (isAtTop && dy > 0 && !last) {
+        event.preventDefault();
+        setIsDragging(true);
+
+        // Non-linear resistance: easy at start, harder at end (Apple-like)
+        const stretchedY = calculateResistance(my);
+        setPullY(stretchedY);
+
+        // Haptic feedback at 70% max stretch (107px pulls = 50px UI)
+        if (stretchedY >= 50 * 0.7) {
+          triggerHaptic(5);
+        }
+      }
+
+      // On release, trigger spring animation back to zero
+      if (last) {
+        setIsDragging(false);
+      }
+    },
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -88,17 +141,23 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
   }
 
   return (
-    <div className="app-viewport" dir="rtl">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.div
-          key={location.pathname}
-          custom={direction}
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          className="page-wrapper"
-        >
+    <div className="app-viewport" dir="rtl" ref={appShellRef} {...bind()}>
+      {/* Global Elastic Bounce Shell - applies to entire app */}
+      <motion.div
+        animate={{ y: !isDragging ? 0 : pullY }}
+        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
+        style={{ height: '100%' }}
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={location.pathname}
+            custom={direction}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="page-wrapper"
+          >
           <div className="font-arabic text-text-main">
             <Routes>
               <Route
@@ -114,11 +173,12 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
             </Routes>
           </div>
         </motion.div>
-      </AnimatePresence>
-      <Navigation />
-      <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
-      <InstallPrompt />
-      <UpdateToast />
+        </AnimatePresence>
+        <Navigation />
+        <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
+        <InstallPrompt />
+        <UpdateToast />
+      </motion.div>
     </div>
   );
 };
