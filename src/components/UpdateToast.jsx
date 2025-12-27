@@ -41,9 +41,13 @@ const UpdateToast = () => {
                 >
                     <div className="glass-card flex items-center gap-4 px-5 py-3 rounded-2xl border border-primary/20 shadow-xl shadow-primary/10">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                <RefreshCw size={20} className="animate-spin-slow" />
-                            </div>
+                            <motion.div 
+                                className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                <RefreshCw size={20} />
+                            </motion.div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-gray-800">تحديث جديد متاح</span>
                                 <span className="text-xs text-gray-500">قم بالتحديث للحصول على آخر المميزات</span>

@@ -96,20 +96,22 @@ const Dashboard = ({ onShowModal }) => {
       {...bind()}
     >
       {/* Pull-to-Refresh Indicator */}
-      <motion.div
-        className="fixed top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-        style={{ y: pullY }}
-      >
+      {isRefreshing && (
         <motion.div
-          className="flex flex-col items-center gap-2"
-          animate={{ rotate: isRefreshing ? 360 : 0 }}
-          transition={{ 
-            rotate: { duration: 1, repeat: isRefreshing ? Infinity : 0, linear: true }
-          }}
+          className="fixed top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+          style={{ y: pullY }}
         >
-          <RefreshCw size={24} className="text-primary" strokeWidth={2} />
+          <motion.div
+            className="flex flex-col items-center gap-2"
+            animate={{ rotate: 360 }}
+            transition={{ 
+              rotate: { duration: 1, repeat: Infinity, linear: true }
+            }}
+          >
+            <RefreshCw size={24} className="text-primary" strokeWidth={2} />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
 
       {/* Premium Header */}
       <header className="sticky top-0 z-30 pt-safe-top">
