@@ -20,29 +20,61 @@ import { initializeScrollAnimations, initializeRevealOnScroll } from './utils/sc
 import { addCapabilityClasses, installPolyfills } from './utils/modernCSS';
 import './index.css';
 
+// Route depth mapping for directional transitions
+const ROUTE_DEPTH = {
+  '/': 0,
+  '/add': 1,
+  '/settings': 1,
+};
+
 // Inner component that uses routing
 const AppContent = ({ showModal, setShowModal, appReady }) => {
   const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
+  const [direction, setDirection] = useState(0);
+  const [prevDepth, setPrevDepth] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Reset theme only when navigating between specific routes
+  // Track navigation direction based on route depth
   useEffect(() => {
-    // Only reset theme on route changes, not on initial mount
-    if (isMounted && location.pathname === '/') {
+    if (!isMounted) return;
+    
+    const currentDepth = ROUTE_DEPTH[location.pathname] || 0;
+    setDirection(currentDepth > prevDepth ? 1 : -1); // 1 = push (right), -1 = pop (left)
+    setPrevDepth(currentDepth);
+
+    // Reset theme only when navigating to home
+    if (location.pathname === '/') {
       resetTheme();
       window.scrollTo(0, 0);
     }
-  }, [location.pathname, isMounted]);
+  }, [location.pathname, isMounted, prevDepth]);
 
-  // Page transition variants
+  // Page transition variants with directional animation
   const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    initial: (direction) => ({
+      opacity: 0,
+      x: direction > 0 ? 100 : -100,  // Push: slide from right, Pop: slide from left
+    }),
+    animate: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+      },
+    },
+    exit: (direction) => ({
+      opacity: 0,
+      x: direction > 0 ? -50 : 100,  // Push: fade out left, Pop: slide out right
+      transition: {
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+      },
+    }),
   };
 
   if (!appReady) {
@@ -51,14 +83,14 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
 
   return (
     <div className="min-h-screen font-arabic text-text-main" dir="rtl">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={location.pathname}
+          custom={direction}
           variants={pageVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         >
           <Routes>
             <Route

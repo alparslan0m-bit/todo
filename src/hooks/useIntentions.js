@@ -1,9 +1,10 @@
 /**
  * Custom hook for managing intentions with real-time updates
  * Synchronizes with LocalStorage and triggers re-renders when data changes
+ * Optimized: Lazy initialization for instant load (no useEffect delay)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   getIntentions,
   addIntention as addIntentionToStorage,
@@ -11,18 +12,8 @@ import {
 } from '../utils/storage';
 
 export const useIntentions = () => {
-  const [intentions, setIntentions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Load intentions from storage on component mount
-  useEffect(() => {
-    const loadIntentions = () => {
-      const storedIntentions = getIntentions();
-      setIntentions(storedIntentions);
-      setLoading(false);
-    };
-    loadIntentions();
-  }, []);
+  // Lazy initialization: Load from localStorage immediately on first render
+  const [intentions, setIntentions] = useState(() => getIntentions());
 
   // Add a new intention
   const addIntention = useCallback((intention) => {
@@ -46,7 +37,6 @@ export const useIntentions = () => {
 
   return {
     intentions,
-    loading,
     addIntention,
     deleteIntention
   };
