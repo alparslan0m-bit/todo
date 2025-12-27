@@ -13,6 +13,7 @@ import Navigation from './components/Navigation';
 import TaskModal from './components/TaskModal';
 import SplashScreen from './components/SplashScreen';
 import InstallPrompt from './components/InstallPrompt';
+import UpdateToast from './components/UpdateToast';
 import { TaskProvider } from './context/TaskContext';
 import { initializeStorage } from './utils/storage';
 import { initializeDynamicTheme, resetTheme } from './utils/dynamicTheme';
@@ -41,7 +42,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
   // Track navigation direction based on route depth
   useEffect(() => {
     if (!isMounted) return;
-    
+
     const currentDepth = ROUTE_DEPTH[location.pathname] || 0;
     setDirection(currentDepth > prevDepth ? 1 : -1); // 1 = push (right), -1 = pop (left)
     setPrevDepth(currentDepth);
@@ -83,7 +84,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
   };
 
   if (!appReady) {
-    return <SplashScreen onComplete={() => {}} />;
+    return <SplashScreen onComplete={() => { }} />;
   }
 
   return (
@@ -117,6 +118,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
       <Navigation />
       <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
       <InstallPrompt />
+      <UpdateToast />
     </div>
   );
 };
@@ -129,22 +131,36 @@ function App() {
   // Initialize storage and modern CSS features on app load
   useEffect(() => {
     initializeStorage();
-    
+
     // Phase 4: Initialize dynamic theme synchronization
     const themeObserver = initializeDynamicTheme();
-    
+
     // Phase 2: Initialize scroll-linked animations
     initializeScrollAnimations();
     initializeRevealOnScroll();
-    
+
     // Modern CSS feature detection and polyfills
     installPolyfills();
     addCapabilityClasses();
-    
+
     // Set app ready immediately after initialization (removed 3-second delay)
     setAppReady(true);
-    
+
+    // Phase IV: Listen for app installation
+    const handleAppInstalled = () => {
+      console.log('[PWA] App installed successfully');
+      // Clear any temporary state, sync data, show welcome screen, etc.
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'CACHE_UPDATE'
+        });
+      }
+    };
+
+    window.addEventListener('appinstalled', handleAppInstalled);
+
     return () => {
+      window.removeEventListener('appinstalled', handleAppInstalled);
       if (themeObserver) {
         themeObserver.disconnect();
       }

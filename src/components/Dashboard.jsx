@@ -190,7 +190,7 @@ const Dashboard = ({ onShowModal }) => {
               استثمر وقتك وأضف مهاماً جديدة لزيادة إنتاجيتك اليوم.
             </p>
             <motion.button
-              onClick={() => navigate('/add')}
+              onClick={() => navigate('/add', { replace: true })}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="group flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all hover:shadow-primary/40"

@@ -1,30 +1,133 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#2d5016" />
-    <meta name="description" content="تطبيق ويب لإدارة المهام بنية إسلامية - PWA To-Do List App" />
-    <title>تودو - Islamic To-Do List</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-  </head>
-  <body class="font-arabic bg-light text-primary">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <script>
-      // Register service worker for PWA functionality
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js').catch(err => {
-          console.log('ServiceWorker registration failed: ', err);
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="تودو" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Status Bar & Theme -->
+  <meta name="theme-color" content="#1A4D2E" />
+  <meta name="description" content="تطبيق إسلامي معاصر لإدارة المهام اليومية مع التركيز على تجديد النية والقصد." />
+  <title>تودو - إدارة المهام بنية</title>
+
+  <style>
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      -webkit-touch-callout: none;
+    }
+  </style>
+
+  <!-- Favicon & Apple Touch Icon -->
+  <!-- Favicon & Apple Touch Icon -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body class="font-arabic bg-light text-primary">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <script>
+    // Register service worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('[PWA] ServiceWorker registered');
+
+            // 1. Handle immediate update if waiting (from previous session)
+            if (registration.waiting) {
+              console.log('[PWA] Update available from previous session');
+              window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration }));
+            }
+
+            // 2. Handle future updates (detect new SW while current one is running)
+            registration.onupdatefound = () => {
+              const installingWorker = registration.installing;
+              console.log('[PWA] New service worker installing...');
+              
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // A new service worker is waiting to activate
+                  console.log('[PWA] Update available - new SW installed and waiting');
+                  window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration }));
+                }
+              };
+            };
+
+            // 3. Check for updates periodically (every 60 seconds)
+            setInterval(() => {
+              registration.update().catch(err => {
+                console.warn('[PWA] Update check failed:', err);
+              });
+            }, 60000);
+          })
+          .catch(err => {
+            console.error('[PWA] ServiceWorker registration failed:', err);
+          });
+
+        // 4. Reload page when new service worker takes over (after user clicks update)
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            console.log('[PWA] New SW activated, reloading page');
+            window.location.reload();
+            refreshing = true;
+          }
         });
+      });
+    }
+
+    // Install prompt handling for Android - Shared via Window
+    window.deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      window.deferredPrompt = e;
+      console.log('[PWA] Global beforeinstallprompt captured');
+
+      // Dispatch custom event for React components to listen to
+      window.dispatchEvent(new CustomEvent('pwa-prompt-available'));
+    });
+
+    // Listen for app installation
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] App successfully installed');
+      deferredPrompt = null;
+      // Log installation metrics
+      if ('sendBeacon' in navigator) {
+        navigator.sendBeacon('/api/install-metrics', JSON.stringify({
+          installed: true,
+          timestamp: new Date().toISOString()
+        }));
       }
-    </script>
-  </body>
+    });
+
+    // Prevent elastic bounce on iOS
+    document.addEventListener('touchmove', e => {
+      if (e.target.closest('.page-wrapper') === null) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  </script>
+</body>
+
 </html>

@@ -92,7 +92,7 @@ const AddTask = () => {
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-4 py-4 flex items-center justify-between">
           <motion.button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/', { replace: true })}
             className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

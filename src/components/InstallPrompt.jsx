@@ -12,23 +12,35 @@ const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
-    const handler = (e) => {
-      // Prevent the mini-infobar from appearing
-      e.preventDefault();
-      // Stash the event for later use
-      setDeferredPrompt(e);
-      // Show custom install prompt after a short delay
+    // 1. Check if event was already captured by index.html
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
       setTimeout(() => setShowPrompt(true), 2000);
+    }
+
+    // 2. Listen for future captures
+    const handleCapture = () => {
+      if (window.deferredPrompt) {
+        setDeferredPrompt(window.deferredPrompt);
+        setTimeout(() => setShowPrompt(true), 1500);
+      }
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('pwa-prompt-available', handleCapture);
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setTimeout(() => setShowPrompt(true), 2000);
+    });
 
     // Check if app is already installed
-    if (window.navigator.standalone === true) {
+    if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
       setShowPrompt(false);
     }
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    return () => {
+      window.removeEventListener('pwa-prompt-available', handleCapture);
+    };
   }, []);
 
   const handleInstall = async () => {

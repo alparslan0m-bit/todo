@@ -39,7 +39,7 @@ const Navigation = () => {
             const isActive = location.pathname === item.path;
 
             return (
-              <Link key={item.id} to={item.path}>
+              <Link key={item.id} to={item.path} replace>
                 <motion.button
                   onClick={handleNavClick}
                   className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
