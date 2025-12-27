@@ -70,6 +70,7 @@
   background-color: transparent;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+  will-change: transform;
 }
 
 /* Content inside page wrapper - solid background to reveal Aurora on pull */
@@ -79,6 +80,9 @@
   background-color: var(--bg-primary);
   min-height: 100%;
   width: 100%;
+  will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Allow touch-action pan-y on Dashboard and children */

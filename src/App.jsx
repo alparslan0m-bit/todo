@@ -29,16 +29,32 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
   const [pullY, setPullY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const appShellRef = useRef(null);
+  const hapticTriggeredRef = useRef(false);
 
-  // Logarithmic rubberband formula: smooth, natural resistance
+  // Enhanced logarithmic rubberband formula: ultra-smooth resistance
+  // Feels premium and organic, not robotic
   const calculateResistance = (movement) => {
-    return (movement * 0.5) / (1 + (movement * 0.005));
+    // More aggressive initial response, then smooth decay
+    return (movement * 0.6) / (1 + (movement * 0.008));
   };
 
-  // Global elastic bounce gesture - Single page, simple scroll detection
+  // Reset bounce state when view changes (important for SPA)
+  useEffect(() => {
+    setPullY(0);
+    setIsDragging(false);
+    hapticTriggeredRef.current = false;
+    
+    // Scroll to top when switching views
+    const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
+    if (pageWrapper) {
+      pageWrapper.scrollTop = 0;
+    }
+  }, [currentView]);
+
+  // Global elastic bounce gesture - Optimized for SPA
   const bind = useGesture({
     onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
-      // Simple single-page scroll detection
+      // Detect scroll position in single page wrapper
       const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
       const isAtTop = pageWrapper?.scrollTop === 0;
 
@@ -53,19 +69,21 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
         event.preventDefault();
         setIsDragging(true);
 
-        // Logarithmic resistance: smooth, natural, Apple-authentic physics
+        // Enhanced logarithmic resistance: premium smooth physics
         const stretchedY = calculateResistance(my);
         setPullY(stretchedY);
 
-        // Haptic feedback at ~35px max stretch (gentle trigger point)
-        if (stretchedY >= 35 * 0.7) {
-          triggerHaptic(5);
+        // Single haptic trigger at optimal stretch point (not repeated)
+        if (stretchedY >= 25 && !hapticTriggeredRef.current) {
+          hapticTriggeredRef.current = true;
+          triggerHaptic(8); // Stronger haptic for premium feel
         }
       }
 
       // On release, trigger spring animation back to zero
       if (last) {
         setIsDragging(false);
+        hapticTriggeredRef.current = false; // Reset for next gesture
       }
     },
   });
@@ -89,19 +107,26 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
 
   return (
     <div className="app-viewport" dir="rtl" ref={appShellRef} {...bind()}>
-      {/* Global Elastic Bounce Shell with Cinematic Effects */}
+      {/* Global Elastic Bounce Shell with Enhanced Cinematic Effects */}
       <motion.div
         animate={{
           y: !isDragging ? 0 : pullY,
-          scale: !isDragging ? 1 : Math.max(0.98, 1 - pullY * 0.005), // 0.98 scale at max pull
+          scale: !isDragging ? 1 : Math.max(0.97, 1 - pullY * 0.008), // Stronger scale effect
           boxShadow: !isDragging
             ? '0 0 0 rgba(0, 0, 0, 0)'
-            : `0 ${Math.min(pullY * 0.5, 20)}px ${Math.min(pullY * 1.5, 40)}px rgba(0, 0, 0, ${Math.min(pullY * 0.02, 0.3)})` // Dynamic shadow
+            : `0 ${Math.min(pullY * 0.6, 25)}px ${Math.min(pullY * 2, 60)}px rgba(0, 0, 0, ${Math.min(pullY * 0.025, 0.4)})` // Enhanced depth shadow
         }}
-        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 150, damping: 20 }} // Softer spring for buttery settle
-        style={{ height: '100%', transformOrigin: 'center top', position: 'relative', zIndex: 10 }}
+        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 140, damping: 22 }} // Even smoother spring
+        style={{ 
+          height: '100%', 
+          transformOrigin: 'center top', 
+          position: 'relative', 
+          zIndex: 10,
+          WebkitUserSelect: 'none',
+          userSelect: 'none'
+        }}
       >
-        {/* Single page wrapper - no animation, no routes */}
+        {/* Single page wrapper - optimized for SPA */}
         <div className="page-wrapper">
           <div className="font-arabic text-text-main">
             {renderView()}
