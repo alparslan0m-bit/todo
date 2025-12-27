@@ -1,6 +1,6 @@
 /**
  * Dashboard Component
- * Premium tasks view with pull-to-refresh and stunning UI/UX
+ * Premium tasks view with physics-based elastic bounce (Apple native feel)
  * Phase 4: Category theme switching with applyCategoryTheme
  */
 
@@ -16,9 +16,9 @@ import {
   Plus,
   CheckCircle2,
   Filter,
-  RefreshCw
 } from 'lucide-react';
 import { useGesture } from '@use-gesture/react';
+import { useHaptic } from '../hooks/useHaptic';
 import TaskCard from './TaskCard';
 import { useTaskContext } from '../context/TaskContext';
 
@@ -26,12 +26,15 @@ const CATEGORIES = ['عبادات', 'علم', 'عمل', 'أسرة', 'نفس', '�
 
 const Dashboard = ({ onShowModal }) => {
   const navigate = useNavigate();
+  const { triggerHaptic } = useHaptic();
   const { tasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [greeting, setGreeting] = useState({ text: 'صباح الخير', icon: Sun });
   const [pullY, setPullY] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
+  const maxStretch = 60; // Maximum stretch before haptic feedback
+  const resistanceFactor = 0.3; // Stretch 100px pull = 30px UI movement
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -40,22 +43,26 @@ const Dashboard = ({ onShowModal }) => {
     else setGreeting({ text: 'مساء الخير', icon: Moon });
   }, []);
 
-  // Pull-to-refresh gesture
+  // Physics-based elastic bounce gesture (Apple native feel)
   const bind = useGesture({
-    onDrag: ({ offset: [, oy], velocity: [, vy], last }) => {
-      if (containerRef.current?.scrollTop === 0) {
-        setPullY(Math.max(0, oy * 0.5));
+    onDrag: ({ offset: [, oy], velocity: [, vy], last, direction: [, dy] }) => {
+      // Only allow pull-down when at top of scroll
+      if (containerRef.current?.scrollTop === 0 && dy > 0) {
+        setIsDragging(!last);
         
-        if (last && oy > 80) {
-          setIsRefreshing(true);
-          // Simulate refresh
-          setTimeout(() => {
-            setIsRefreshing(false);
-            setPullY(0);
-            if (navigator.vibrate) navigator.vibrate([10, 20, 10]);
-          }, 1500);
-        } else if (last) {
-          setPullY(0);
+        // Apply resistance factor: pulling 100px only moves UI 30px
+        const stretchedY = Math.min(oy * resistanceFactor, maxStretch);
+        setPullY(stretchedY);
+
+        // Haptic feedback at max stretch point
+        if (stretchedY >= maxStretch * 0.9 && !last) {
+          triggerHaptic(5); // Light impact
+        }
+
+        // On release, trigger spring animation back to zero
+        if (last) {
+          setIsDragging(false);
+          // Spring will handle the bounce-back via Framer Motion
         }
       }
     },
@@ -95,25 +102,11 @@ const Dashboard = ({ onShowModal }) => {
       className="px-4 py-4 pb-32"
       {...bind()}
     >
-      {/* Pull-to-Refresh Indicator */}
-      {isRefreshing && (
-        <motion.div
-          className="fixed top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-          style={{ y: pullY }}
-        >
-          <motion.div
-            className="flex flex-col items-center gap-2"
-            animate={{ rotate: 360 }}
-            transition={{ 
-              rotate: { duration: 1, repeat: Infinity, linear: true }
-            }}
-          >
-            <RefreshCw size={24} className="text-primary" strokeWidth={2} />
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Premium Header */}
+      {/* Elastic bounce wrapper - Apple native physics */}
+      <motion.div
+        animate={{ y: !isDragging ? 0 : pullY }}
+        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
+      >
       <header className="sticky top-0 z-30 pt-safe-top">
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-6 py-6 flex justify-between items-end">
@@ -248,6 +241,7 @@ const Dashboard = ({ onShowModal }) => {
           </motion.div>
         )}
       </main>
+      </motion.div>
     </div>
   );
 };
