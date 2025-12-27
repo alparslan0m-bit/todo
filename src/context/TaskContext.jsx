@@ -1,9 +1,10 @@
 /**
- * Custom hook for managing tasks with real-time updates
- * Synchronizes with LocalStorage and triggers re-renders when data changes
+ * Task Context
+ * Centralized state management for tasks using React Context API
+ * Ensures real-time synchronization across all components
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   getTasks,
   addTask as addTaskToStorage,
@@ -11,11 +12,13 @@ import {
   deleteTask as deleteTaskFromStorage
 } from '../utils/storage';
 
-export const useTasks = () => {
+const TaskContext = createContext();
+
+export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load tasks from storage on component mount
+  // Load tasks from storage on mount
   useEffect(() => {
     const loadTasks = () => {
       const storedTasks = getTasks();
@@ -82,7 +85,7 @@ export const useTasks = () => {
     return tasks.filter(task => task.completed);
   }, [tasks]);
 
-  return {
+  const value = {
     tasks,
     loading,
     addTask,
@@ -93,4 +96,15 @@ export const useTasks = () => {
     getIncompleteTasks,
     getCompletedTasks
   };
+
+  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
+};
+
+// Custom hook to use TaskContext
+export const useTaskContext = () => {
+  const context = useContext(TaskContext);
+  if (!context) {
+    throw new Error('useTaskContext must be used within a TaskProvider');
+  }
+  return context;
 };

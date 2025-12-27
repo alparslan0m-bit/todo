@@ -4,7 +4,8 @@
  * Phase 4: Category theme switching with applyCategoryTheme
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyCategoryTheme, resetTheme } from '../utils/dynamicTheme';
 import {
@@ -19,12 +20,13 @@ import {
 } from 'lucide-react';
 import { useGesture } from '@use-gesture/react';
 import TaskCard from './TaskCard';
-import { useTasks } from '../hooks/useTasks';
+import { useTaskContext } from '../context/TaskContext';
 
 const CATEGORIES = ['عبادات', 'علم', 'عمل', 'أسرة', 'نفس', 'خير'];
 
-const Dashboard = ({ onNavigateToAdd, onShowModal }) => {
-  const { tasks, updateTaskStatus, deleteTask } = useTasks();
+const Dashboard = ({ onShowModal }) => {
+  const navigate = useNavigate();
+  const { tasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [greeting, setGreeting] = useState({ text: 'صباح الخير', icon: Sun });
   const [pullY, setPullY] = useState(0);
@@ -59,12 +61,23 @@ const Dashboard = ({ onNavigateToAdd, onShowModal }) => {
     },
   });
 
-  const filteredTasks = selectedCategory
-    ? tasks.filter(task => task.category === selectedCategory)
-    : tasks;
+  // Memoize filtered tasks for performance optimization
+  const filteredTasks = useMemo(() =>
+    selectedCategory
+      ? tasks.filter(task => task.category === selectedCategory)
+      : tasks,
+    [tasks, selectedCategory]
+  );
 
-  const incompleteTasks = filteredTasks.filter(t => !t.completed);
-  const completedTasks = filteredTasks.filter(t => t.completed);
+  const incompleteTasks = useMemo(() =>
+    filteredTasks.filter(t => !t.completed),
+    [filteredTasks]
+  );
+
+  const completedTasks = useMemo(() =>
+    filteredTasks.filter(t => t.completed),
+    [filteredTasks]
+  );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -177,7 +190,7 @@ const Dashboard = ({ onNavigateToAdd, onShowModal }) => {
               استثمر وقتك وأضف مهاماً جديدة لزيادة إنتاجيتك اليوم.
             </p>
             <motion.button
-              onClick={onNavigateToAdd}
+              onClick={() => navigate('/add')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="group flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all hover:shadow-primary/40"

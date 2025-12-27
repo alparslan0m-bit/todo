@@ -5,21 +5,23 @@
  */
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Home, Plus, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHaptic } from '../hooks/useHaptic';
 
-const Navigation = ({ currentPage, onNavigate }) => {
+const Navigation = () => {
   const { triggerHaptic } = useHaptic();
+  const location = useLocation();
+  
   const navItems = [
-    { id: 'dashboard', label: 'الرئيسية', icon: Home },
-    { id: 'add', label: 'إضافة', icon: Plus },
-    { id: 'settings', label: 'الإعدادات', icon: Settings },
+    { id: 'dashboard', path: '/', label: 'الرئيسية', icon: Home },
+    { id: 'add', path: '/add', label: 'إضافة', icon: Plus },
+    { id: 'settings', path: '/settings', label: 'الإعدادات', icon: Settings },
   ];
 
-  const handleNavClick = (id) => {
+  const handleNavClick = () => {
     triggerHaptic(10); // Light tap
-    onNavigate(id);
   };
 
   return (
@@ -34,48 +36,49 @@ const Navigation = ({ currentPage, onNavigate }) => {
         >
           {navItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive = currentPage === item.id;
+            const isActive = location.pathname === item.path;
 
             return (
-              <motion.button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isActive
-                    ? 'text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                style={{
-                  background: isActive ? 'var(--primary)' : 'transparent',
-                  transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.92 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  type: 'spring',
-                  damping: 20,
-                  stiffness: 300,
-                  delay: index * 0.05,
-                }}
-              >
-                <Icon size={20} strokeWidth={2.5} />
+              <Link key={item.id} to={item.path}>
+                <motion.button
+                  onClick={handleNavClick}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isActive
+                      ? 'text-white'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  style={{
+                    background: isActive ? 'var(--primary)' : 'transparent',
+                    transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.92 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    type: 'spring',
+                    damping: 20,
+                    stiffness: 300,
+                    delay: index * 0.05,
+                  }}
+                >
+                  <Icon size={20} strokeWidth={2.5} />
 
-                {/* Phase 5: Subtle glow for active item */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      boxShadow: '0 0 20px var(--primary)',
-                      opacity: 0.3,
-                    }}
-                    initial={{ opacity: 0, scale: 1.5 }}
-                    animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                )}
-              </motion.button>
+                  {/* Phase 5: Subtle glow for active item */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        boxShadow: '0 0 20px var(--primary)',
+                        opacity: 0.3,
+                      }}
+                      initial={{ opacity: 0, scale: 1.5 }}
+                      animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                </motion.button>
+              </Link>
             );
           })}
         </motion.div>

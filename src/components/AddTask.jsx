@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -16,7 +17,7 @@ import {
   Plus,
   Check
 } from 'lucide-react';
-import { useTasks } from '../hooks/useTasks';
+import { useTaskContext } from '../context/TaskContext';
 import { useIntentions } from '../hooks/useIntentions';
 
 const CATEGORIES = [
@@ -28,8 +29,9 @@ const CATEGORIES = [
   { name: 'خير', icon: Heart, color: 'text-emerald-600', bg: 'bg-emerald-50' }
 ];
 
-const AddTask = ({ onNavigateDashboard }) => {
-  const { addTask } = useTasks();
+const AddTask = () => {
+  const navigate = useNavigate();
+  const { addTask } = useTaskContext();
   const { intentions, addIntention } = useIntentions();
 
   const [title, setTitle] = useState('');
@@ -90,7 +92,7 @@ const AddTask = ({ onNavigateDashboard }) => {
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-4 py-4 flex items-center justify-between">
           <motion.button
-            onClick={onNavigateDashboard}
+            onClick={() => navigate('/')}
             className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
