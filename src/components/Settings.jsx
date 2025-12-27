@@ -56,8 +56,8 @@ const Settings = () => {
           exit={{ opacity: 0, y: -10 }}
         >
           <div className={`px-4 py-3 rounded-2xl flex items-center gap-2 ${backupMessage.includes('✓')
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'
             }`}>
             <span className="font-bold">{backupMessage}</span>
           </div>
@@ -83,9 +83,9 @@ const Settings = () => {
             عن التطبيق
           </h2>
           <div className="space-y-4 text-gray-600 leading-relaxed">
-            <p className="font-bold text-gray-900">تودو - تطبيق إدارة المهام الإسلامي</p>
+            <p className="font-bold text-gray-900">تودو - أن تكون أعمالنا كلها لله</p>
             <p>
-              تطبيق ويب تقدمي (PWA) يساعدك على إدارة مهامك اليومية مع التركيز على النيات والقصد الديني.
+              يساعدك على إدارة مهامك اليومية مع التذكير بالنية في أعمالك.
             </p>
             <div className="flex gap-4 text-sm bg-slate-50 p-4 rounded-2xl">
               <div>
@@ -93,7 +93,7 @@ const Settings = () => {
               </div>
               <div className="h-full w-px bg-gray-200" />
               <div>
-                <strong>المطور:</strong><br />فريق جماليات
+                <strong>المطور:</strong><br /> محمد عبد العزيز
               </div>
             </div>
           </div>
