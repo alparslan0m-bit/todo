@@ -165,37 +165,7 @@ export const deleteIntention = (intention) => {
   }
 };
 
-/**
- * Exports all data as JSON for backup
- * @returns {Object} Tasks and intentions data
- */
-export const exportData = () => {
-  return {
-    tasks: getTasks(),
-    intentions: getIntentions(),
-    exportedAt: new Date().toISOString()
-  };
-};
 
-/**
- * Imports data from backup JSON
- * @param {Object} data - Data object with tasks and intentions
- * @returns {boolean} True if import was successful
- */
-export const importData = (data) => {
-  try {
-    if (data.tasks && Array.isArray(data.tasks)) {
-      localStorage.setItem(TASKS_KEY, JSON.stringify(data.tasks));
-    }
-    if (data.intentions && Array.isArray(data.intentions)) {
-      localStorage.setItem(INTENTIONS_KEY, JSON.stringify(data.intentions));
-    }
-    return true;
-  } catch (error) {
-    console.error('Error importing data:', error);
-    return false;
-  }
-};
 
 /**
  * Clears all data from LocalStorage (destructive operation)

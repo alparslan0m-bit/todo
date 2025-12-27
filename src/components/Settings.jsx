@@ -7,59 +7,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, Upload, Trash2, ShieldAlert, BadgeInfo, Save } from 'lucide-react';
-import { exportData, importData, clearAllData } from '../utils/storage';
+import { ArrowRight, Trash2, ShieldAlert, BadgeInfo } from 'lucide-react';
+import { clearAllData } from '../utils/storage';
 
 const Settings = () => {
   const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [backupMessage, setBackupMessage] = useState('');
 
-  // Handle backup download
-  const handleBackup = () => {
-    const data = exportData();
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tododo-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
 
-    setBackupMessage('✓ تم تحميل النسخة الاحتياطية بنجاح');
-    setTimeout(() => setBackupMessage(''), 3000);
-  };
-
-  // Handle restore from backup
-  const handleRestore = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const data = JSON.parse(event.target.result);
-            if (importData(data)) {
-              setBackupMessage('✓ تم استعادة البيانات بنجاح');
-              setTimeout(() => {
-                window.location.reload();
-              }, 1500);
-            }
-          } catch (error) {
-            setBackupMessage('✗ فشل في استعادة البيانات');
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
 
   // Handle clear all data
   const handleClearAll = () => {
@@ -115,36 +71,7 @@ const Settings = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        {/* Backup & Restore Section */}
-        <motion.div
-          className="glass-card rounded-3xl p-6"
-          whileHover={{ y: -2 }}
-        >
-          <h2 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
-            <Save className="text-primary" />
-            النسخ الاحتياطي والاستعادة
-          </h2>
-          <div className="space-y-3">
-            <motion.button
-              onClick={handleBackup}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-3"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Download size={20} />
-              تحميل نسخة احتياطية
-            </motion.button>
-            <motion.button
-              onClick={handleRestore}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-3"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Upload size={20} />
-              استعادة من نسخة احتياطية
-            </motion.button>
-          </div>
-        </motion.div>
+
 
         {/* About Section */}
         <motion.div
