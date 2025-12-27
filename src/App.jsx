@@ -42,22 +42,20 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
   const [isDragging, setIsDragging] = useState(false);
   const appShellRef = useRef(null);
 
-  // Non-linear resistance curve: diminishing returns as you pull harder
+  // Logarithmic rubberband formula: smooth, natural resistance (no "wall" feeling)
+  // y = (movement * 0.5) / (1 + (movement * 0.005))
+  // This creates perfect Apple-like physics with infinite resistance
   const calculateResistance = (movement) => {
-    if (movement < 20) {
-      return movement * 1.0; // 0-20px: full movement
-    } else if (movement < 50) {
-      return 20 + (movement - 20) * 0.5; // 20-50px: half movement
-    } else {
-      return 35 + (movement - 50) * 0.2; // 50+px: 20% movement (max resistance)
-    }
+    return (movement * 0.5) / (1 + (movement * 0.005));
   };
 
-  // Global elastic bounce shell - works across all pages
+  // Global elastic bounce shell - works across all pages with cinematic aesthetics
   const bind = useGesture({
     onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
-      // Get the active page wrapper
-      const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
+      // Get the ACTIVE page wrapper using data-path attribute (fixes Settings bug)
+      const pageWrapper = appShellRef.current?.querySelector(
+        `.page-wrapper[data-path="${location.pathname}"]`
+      );
       const isAtTop = pageWrapper?.scrollTop === 0;
 
       // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
@@ -71,12 +69,12 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
         event.preventDefault();
         setIsDragging(true);
 
-        // Non-linear resistance: easy at start, harder at end (Apple-like)
+        // Logarithmic resistance: smooth, natural, Apple-authentic physics
         const stretchedY = calculateResistance(my);
         setPullY(stretchedY);
 
-        // Haptic feedback at 70% max stretch (107px pulls = 50px UI)
-        if (stretchedY >= 50 * 0.7) {
+        // Haptic feedback at ~35px max stretch (gentle trigger point)
+        if (stretchedY >= 35 * 0.7) {
           triggerHaptic(5);
         }
       }
@@ -142,11 +140,17 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
 
   return (
     <div className="app-viewport" dir="rtl" ref={appShellRef} {...bind()}>
-      {/* Global Elastic Bounce Shell - applies to entire app */}
+      {/* Global Elastic Bounce Shell with Cinematic Effects */}
       <motion.div
-        animate={{ y: !isDragging ? 0 : pullY }}
-        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
-        style={{ height: '100%' }}
+        animate={{
+          y: !isDragging ? 0 : pullY,
+          scale: !isDragging ? 1 : Math.max(0.98, 1 - pullY * 0.005), // 0.98 scale at max pull
+          boxShadow: !isDragging
+            ? '0 0 0 rgba(0, 0, 0, 0)'
+            : `0 ${Math.min(pullY * 0.5, 20)}px ${Math.min(pullY * 1.5, 40)}px rgba(0, 0, 0, ${Math.min(pullY * 0.02, 0.3)})` // Dynamic shadow
+        }}
+        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 150, damping: 20 }} // Softer spring for buttery settle
+        style={{ height: '100%', transformOrigin: 'center top' }}
       >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
@@ -157,6 +161,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
             animate="animate"
             exit="exit"
             className="page-wrapper"
+            data-path={location.pathname}
           >
           <div className="font-arabic text-text-main">
             <Routes>

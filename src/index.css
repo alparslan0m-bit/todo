@@ -67,9 +67,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior-y: none;
-  background-color: var(--bg-primary);
+  background-color: transparent;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+}
+
+/* Content inside page wrapper - solid background to reveal Aurora on pull */
+.page-wrapper > div {
+  background-color: var(--bg-primary);
 }
 
 /* Allow touch-action pan-y on Dashboard and children */
