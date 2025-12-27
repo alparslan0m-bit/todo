@@ -29,7 +29,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="px-4 py-4 pb-20">
       {/* Header */}
       <div className="pt-safe-top sticky top-0 z-30">
         <div className="absolute inset-0 glass border-b border-white/20" />

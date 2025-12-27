@@ -86,7 +86,7 @@ const AddTask = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="px-4 py-4 pb-24">
       {/* Header */}
       <div className="pt-safe-top sticky top-0 z-30">
         <div className="absolute inset-0 glass border-b border-white/20" />

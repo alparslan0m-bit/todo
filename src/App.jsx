@@ -98,7 +98,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
           exit="exit"
           className="page-wrapper"
         >
-          <div className="min-h-screen font-arabic text-text-main">
+          <div className="font-arabic text-text-main">
             <Routes>
               <Route
                 path="/"

@@ -92,7 +92,7 @@ const Dashboard = ({ onShowModal }) => {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen pb-32 overflow-y-auto"
+      className="px-4 py-4 pb-32"
       {...bind()}
     >
       {/* Pull-to-Refresh Indicator */}
