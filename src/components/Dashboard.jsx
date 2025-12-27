@@ -45,25 +45,37 @@ const Dashboard = ({ onShowModal }) => {
 
   // Physics-based elastic bounce gesture (Apple native feel)
   const bind = useGesture({
-    onDrag: ({ offset: [, oy], velocity: [, vy], last, direction: [, dy] }) => {
+    onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
+      // Get the actual scrollable element (.page-wrapper)
+      const pageWrapper = containerRef.current?.closest('.page-wrapper');
+      const isAtTop = pageWrapper?.scrollTop === 0;
+      
+      // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
+      if (!isAtTop || dy < 0) {
+        cancel();
+        return;
+      }
+      
       // Only allow pull-down when at top of scroll
-      if (containerRef.current?.scrollTop === 0 && dy > 0) {
-        setIsDragging(!last);
+      if (isAtTop && dy > 0 && !last) {
+        // Prevent native scroll while gesture is active
+        event.preventDefault();
+        setIsDragging(true);
         
         // Apply resistance factor: pulling 100px only moves UI 30px
-        const stretchedY = Math.min(oy * resistanceFactor, maxStretch);
+        const stretchedY = Math.min(my * resistanceFactor, maxStretch);
         setPullY(stretchedY);
 
         // Haptic feedback at max stretch point
-        if (stretchedY >= maxStretch * 0.9 && !last) {
+        if (stretchedY >= maxStretch * 0.9) {
           triggerHaptic(5); // Light impact
         }
+      }
 
-        // On release, trigger spring animation back to zero
-        if (last) {
-          setIsDragging(false);
-          // Spring will handle the bounce-back via Framer Motion
-        }
+      // On release, trigger spring animation back to zero
+      if (last) {
+        setIsDragging(false);
+        // Spring will handle the bounce-back via Framer Motion
       }
     },
   });
@@ -99,7 +111,7 @@ const Dashboard = ({ onShowModal }) => {
   return (
     <div 
       ref={containerRef}
-      className="px-4 py-4 pb-32"
+      className="px-4 py-4 pb-32 touch-action-pan-y"
       {...bind()}
     >
       {/* Elastic bounce wrapper - Apple native physics */}
