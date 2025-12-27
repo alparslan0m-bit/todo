@@ -42,6 +42,32 @@
   --text-secondary: #666666;
 }
 
+/* ========================================
+   NATIVE APP ARCHITECTURE - Viewport & Layer
+   ======================================== */
+/* App Viewport: The screen size container */
+.app-viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-color: var(--bg-primary);
+}
+
+/* Page Wrapper: Individual page layer with own scrolling */
+.page-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Font family for Arabic support */
 body {
   font-family: 'Cairo', 'Segoe UI', 'Tahoma', 'Helvetica Neue', sans-serif;

@@ -53,26 +53,31 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
     }
   }, [location.pathname, isMounted, prevDepth]);
 
-  // Page transition variants with directional animation
+  // Page transition variants with directional animation and z-index orchestration
   const pageVariants = {
     initial: (direction) => ({
       opacity: 0,
       x: direction > 0 ? 100 : -100,  // Push: slide from right, Pop: slide from left
+      zIndex: direction > 0 ? 2 : 0,  // Push: bring to front, Pop: stay behind
     }),
     animate: {
       opacity: 1,
       x: 0,
+      zIndex: 2,  // Active page is always on top
       transition: {
         x: { type: 'spring', stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
+        zIndex: { duration: 0 },  // z-index change is instant
       },
     },
     exit: (direction) => ({
       opacity: 0,
       x: direction > 0 ? -50 : 100,  // Push: fade out left, Pop: slide out right
+      zIndex: direction > 0 ? 0 : 2,  // Push: go behind, Pop: stay on top to slide away
       transition: {
         x: { type: 'spring', stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
+        zIndex: { duration: 0 },
       },
     }),
   };
@@ -82,7 +87,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
   }
 
   return (
-    <div className="min-h-screen font-arabic text-text-main" dir="rtl">
+    <div className="app-viewport" dir="rtl">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={location.pathname}
@@ -91,19 +96,22 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
           initial="initial"
           animate="animate"
           exit="exit"
+          className="page-wrapper"
         >
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Dashboard
-                  onShowModal={() => setShowModal(true)}
-                />
-              }
-            />
-            <Route path="/add" element={<AddTask />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
+          <div className="min-h-screen font-arabic text-text-main">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Dashboard
+                    onShowModal={() => setShowModal(true)}
+                  />
+                }
+              />
+              <Route path="/add" element={<AddTask />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </div>
         </motion.div>
       </AnimatePresence>
       <Navigation />
