@@ -93,6 +93,7 @@ const TaskCard = ({ task, onComplete, onDelete, index = 0 }) => {
         delay: index * 0.05,
       }}
       className={`mb-3 relative group touch-pan-y task-item ${task.inProgress ? 'task-in-progress' : ''} ${task.completed ? '' : 'task-active'}`}
+      whileHover={{ scale: 1.02 }}
       {...bind()}
     >
       {/* Swipe indicator background */}
