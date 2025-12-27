@@ -141,7 +141,7 @@ const AddTask = () => {
         <div className="space-y-4">
           <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">الفئة</label>
           <div className="grid grid-cols-3 gap-3">
-            {CATEGORIES.map((cat, i) => {
+            {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               const isSelected = category === cat.name;
               return (
@@ -149,14 +149,12 @@ const AddTask = () => {
                   key={cat.name}
                   type="button"
                   onClick={() => setCategory(cat.name)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isSelected
+                  layout
+                  className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-colors ${isSelected
                     ? `${cat.bg} ${cat.color} border-current shadow-lg`
                     : 'bg-white border-transparent hover:bg-gray-50'
                     }`}
                   whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
                 >
                   <Icon size={24} strokeWidth={2} className="mb-2" />
                   <span className="text-xs font-bold">{cat.name}</span>
@@ -171,7 +169,7 @@ const AddTask = () => {
           <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">النية</label>
           <div className="flex flex-wrap gap-2">
             {intentions.map(int => (
-              <button
+              <motion.button
                 key={int}
                 type="button"
                 onClick={() => {
@@ -179,31 +177,33 @@ const AddTask = () => {
                   setNewIntention('');
                   setShowNewIntentionInput(false);
                 }}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${intention === int && !showNewIntentionInput
+                layout
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${intention === int && !showNewIntentionInput
                   ? 'bg-primary text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
               >
                 {int}
-              </button>
+              </motion.button>
             ))}
-            <button
+            <motion.button
               type="button"
               onClick={() => setShowNewIntentionInput(true)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 transition-all ${showNewIntentionInput ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
+              layout
+              className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 transition-colors ${showNewIntentionInput ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
                 }`}
             >
               <Plus size={16} />
               جديدة
-            </button>
+            </motion.button>
           </div>
 
           {/* New Intention Input */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {showNewIntentionInput && (
               <motion.input
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: 50 }}
                 exit={{ opacity: 0, height: 0 }}
                 type="text"
                 value={newIntention}

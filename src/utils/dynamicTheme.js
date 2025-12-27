@@ -2,6 +2,7 @@
  * Dynamic Theme Manager
  * Phase 4: Syncs CSS var(--primary) color with <meta name="theme-color"> in real-time
  * Creates a premium native-app-like experience with responsive browser chrome
+ * Light Mode Only: Removed all dark mode detection
  */
 
 export const initializeDynamicTheme = () => {
@@ -13,7 +14,7 @@ export const initializeDynamicTheme = () => {
     document.head.appendChild(metaTheme);
   }
 
-  // Initialize with current primary color
+  // Initialize with light theme color
   updateMetaTheme();
 
   // Watch for changes to CSS variables
@@ -25,12 +26,6 @@ export const initializeDynamicTheme = () => {
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['style', 'class'],
-  });
-
-  // Option 2: Watch for system theme changes
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-  prefersDark.addEventListener('change', () => {
-    updateMetaTheme();
   });
 
   return observer;
@@ -90,10 +85,9 @@ export const applyCategoryTheme = (category) => {
 };
 
 /**
- * Reset to default theme
+ * Reset to default light theme
+ * Light Mode Only: Always uses light theme color
  */
 export const resetTheme = () => {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const defaultColor = prefersDark ? '#4ADE80' : '#1A4D2E';
-  changePrimaryColor(defaultColor);
+  changePrimaryColor('#1A4D2E'); // Light theme default
 };
