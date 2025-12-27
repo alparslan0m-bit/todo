@@ -150,7 +150,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
             : `0 ${Math.min(pullY * 0.5, 20)}px ${Math.min(pullY * 1.5, 40)}px rgba(0, 0, 0, ${Math.min(pullY * 0.02, 0.3)})` // Dynamic shadow
         }}
         transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 150, damping: 20 }} // Softer spring for buttery settle
-        style={{ height: '100%', transformOrigin: 'center top' }}
+        style={{ height: '100%', transformOrigin: 'center top', position: 'relative', zIndex: 10 }}
       >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
