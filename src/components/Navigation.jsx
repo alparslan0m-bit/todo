@@ -1,35 +1,32 @@
 /**
  * Navigation Component
- * Phase 5: Enhanced with edge-to-edge floating glass dock and spring physics
+ * Single-page app navigation - no routes, just state management
  * Uses CSS Grid and safe-area-inset for perfect mobile adaptation
  */
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Plus, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHaptic } from '../hooks/useHaptic';
 
-const Navigation = () => {
-  const navigate = useNavigate();
+const Navigation = ({ currentView, setCurrentView }) => {
   const { triggerHaptic } = useHaptic();
-  const location = useLocation();
 
   const navItems = [
-    { id: 'dashboard', path: '/', label: 'الرئيسية', icon: Home },
-    { id: 'add', path: '/add', label: 'إضافة', icon: Plus },
-    { id: 'settings', path: '/settings', label: 'الإعدادات', icon: Settings },
+    { id: 'home', label: 'الرئيسية', icon: Home },
+    { id: 'add', label: 'إضافة', icon: Plus },
+    { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 
-  const handleNavClick = (path) => {
+  const handleNavClick = (viewId) => {
     triggerHaptic(10); // Light tap
-    navigate(path, { replace: true });
+    setCurrentView(viewId);
   };
 
   return (
     <nav className="fixed inset-0 pointer-events-none z-50" style={{ insetBlockEnd: 0, insetInlineStart: 0, insetInlineEnd: 0 }}>
       <div className="flex justify-center px-4 absolute inset-x-0 bottom-0 pointer-events-none" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-        {/* Phase 5: Edge-to-edge navigation dock with safe-area support */}
+        {/* Single-page navigation dock with safe-area support */}
         <motion.div
           className="nav-dock pointer-events-auto"
           initial={{ y: 100, opacity: 0 }}
@@ -38,12 +35,12 @@ const Navigation = () => {
         >
           {navItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive = currentView === item.id;
 
             return (
               <motion.button
                 key={item.id}
-                onClick={() => handleNavClick(item.path)}
+                onClick={() => handleNavClick(item.id)}
                 className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${isActive
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
@@ -65,7 +62,7 @@ const Navigation = () => {
               >
                 <Icon size={20} strokeWidth={2.5} />
 
-                {/* Phase 5: Subtle glow for active item */}
+                {/* Subtle glow for active item */}
                 {isActive && (
                   <motion.div
                     className="absolute inset-0 rounded-full"

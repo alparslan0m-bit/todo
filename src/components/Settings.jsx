@@ -1,17 +1,15 @@
 /**
  * Settings Component
- * Backup, restore, and about information
- * Includes animations and transitions
+ * About information and data management
+ * Single-page app state management (no routing)
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Trash2, ShieldAlert, BadgeInfo } from 'lucide-react';
 import { clearAllData } from '../utils/storage';
 
-const Settings = () => {
-  const navigate = useNavigate();
+const Settings = ({ setCurrentView }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [backupMessage, setBackupMessage] = useState('');
 
@@ -35,7 +33,7 @@ const Settings = () => {
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-4 py-4 flex items-center justify-between">
           <motion.button
-            onClick={() => navigate('/', { replace: true })}
+            onClick={() => setCurrentView('home')}
             className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

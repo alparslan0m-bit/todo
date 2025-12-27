@@ -1,12 +1,11 @@
 /**
- * App Component
- * Main application component with routing and state management
- * Global Elastic Bounce Shell: Universal Apple-native physics across all pages
+ * App Component - True Single Page Application
+ * No routing, no URL changes - pure internal state management
+ * Single URL + internal view state = native app feel + perfect elastic bounce
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useGesture } from '@use-gesture/react';
 import Dashboard from './components/Dashboard';
 import AddTask from './components/AddTask';
@@ -24,38 +23,23 @@ import { initializeScrollAnimations, initializeRevealOnScroll } from './utils/sc
 import { addCapabilityClasses, installPolyfills } from './utils/modernCSS';
 import './index.css';
 
-// Route depth mapping for directional transitions
-const ROUTE_DEPTH = {
-  '/': 0,
-  '/add': 1,
-  '/settings': 1,
-};
-
-// Inner component that uses routing
-const AppContent = ({ showModal, setShowModal, appReady }) => {
-  const location = useLocation();
+// Inner component - Single Page View Management (no React Router)
+const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrentView }) => {
   const { triggerHaptic } = useHaptic();
-  const [isMounted, setIsMounted] = useState(false);
-  const [direction, setDirection] = useState(0);
-  const [prevDepth, setPrevDepth] = useState(0);
   const [pullY, setPullY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const appShellRef = useRef(null);
 
-  // Logarithmic rubberband formula: smooth, natural resistance (no "wall" feeling)
-  // y = (movement * 0.5) / (1 + (movement * 0.005))
-  // This creates perfect Apple-like physics with infinite resistance
+  // Logarithmic rubberband formula: smooth, natural resistance
   const calculateResistance = (movement) => {
     return (movement * 0.5) / (1 + (movement * 0.005));
   };
 
-  // Global elastic bounce shell - works across all pages with cinematic aesthetics
+  // Global elastic bounce gesture - Single page, simple scroll detection
   const bind = useGesture({
     onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
-      // Get the ACTIVE page wrapper using data-path attribute (fixes Settings bug)
-      const pageWrapper = appShellRef.current?.querySelector(
-        `.page-wrapper[data-path="${location.pathname}"]`
-      );
+      // Simple single-page scroll detection
+      const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
       const isAtTop = pageWrapper?.scrollTop === 0;
 
       // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
@@ -64,7 +48,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
         return;
       }
 
-      // Only allow pull-down when at top of scroll across all pages
+      // Only allow pull-down when at top of scroll
       if (isAtTop && dy > 0 && !last) {
         event.preventDefault();
         setIsDragging(true);
@@ -86,57 +70,22 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
     },
   });
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Track navigation direction based on route depth
-  useEffect(() => {
-    if (!isMounted) return;
-
-    const currentDepth = ROUTE_DEPTH[location.pathname] || 0;
-    setDirection(currentDepth > prevDepth ? 1 : -1); // 1 = push (right), -1 = pop (left)
-    setPrevDepth(currentDepth);
-
-    // Reset theme only when navigating to home
-    if (location.pathname === '/') {
-      resetTheme();
-      window.scrollTo(0, 0);
-    }
-  }, [location.pathname, isMounted, prevDepth]);
-
-  // Page transition variants with directional animation and z-index orchestration
-  const pageVariants = {
-    initial: (direction) => ({
-      opacity: 0,
-      x: direction > 0 ? 100 : -100,  // Push: slide from right, Pop: slide from left
-      zIndex: direction > 0 ? 2 : 0,  // Push: bring to front, Pop: stay behind
-    }),
-    animate: {
-      opacity: 1,
-      x: 0,
-      zIndex: 2,  // Active page is always on top
-      transition: {
-        x: { type: 'spring', stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 },
-        zIndex: { duration: 0 },  // z-index change is instant
-      },
-    },
-    exit: (direction) => ({
-      opacity: 0,
-      x: direction > 0 ? -50 : 100,  // Push: fade out left, Pop: slide out right
-      zIndex: direction > 0 ? 0 : 2,  // Push: go behind, Pop: stay on top to slide away
-      transition: {
-        x: { type: 'spring', stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 },
-        zIndex: { duration: 0 },
-      },
-    }),
-  };
-
   if (!appReady) {
     return <SplashScreen onComplete={() => { }} />;
   }
+
+  // Render the appropriate view based on currentView state (no routing)
+  const renderView = () => {
+    switch (currentView) {
+      case 'add':
+        return <AddTask setCurrentView={setCurrentView} />;
+      case 'settings':
+        return <Settings setCurrentView={setCurrentView} />;
+      case 'home':
+      default:
+        return <Dashboard onShowModal={() => setShowModal(true)} setCurrentView={setCurrentView} />;
+    }
+  };
 
   return (
     <div className="app-viewport" dir="rtl" ref={appShellRef} {...bind()}>
@@ -152,34 +101,13 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
         transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 150, damping: 20 }} // Softer spring for buttery settle
         style={{ height: '100%', transformOrigin: 'center top', position: 'relative', zIndex: 10 }}
       >
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div
-            key={location.pathname}
-            custom={direction}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="page-wrapper"
-            data-path={location.pathname}
-          >
+        {/* Single page wrapper - no animation, no routes */}
+        <div className="page-wrapper">
           <div className="font-arabic text-text-main">
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Dashboard
-                    onShowModal={() => setShowModal(true)}
-                  />
-                }
-              />
-              <Route path="/add" element={<AddTask />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
+            {renderView()}
           </div>
-        </motion.div>
-        </AnimatePresence>
-        <Navigation />
+        </div>
+        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
         <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
         <InstallPrompt />
         <UpdateToast />
@@ -192,6 +120,7 @@ const AppContent = ({ showModal, setShowModal, appReady }) => {
 function App() {
   const [showModal, setShowModal] = useState(false);
   const [appReady, setAppReady] = useState(false);
+  const [currentView, setCurrentView] = useState('home'); // Internal state for view management
 
   // Initialize storage and modern CSS features on app load
   useEffect(() => {
@@ -208,13 +137,12 @@ function App() {
     installPolyfills();
     addCapabilityClasses();
 
-    // Set app ready immediately after initialization (removed 3-second delay)
+    // Set app ready immediately after initialization
     setAppReady(true);
 
     // Phase IV: Listen for app installation
     const handleAppInstalled = () => {
       console.log('[PWA] App installed successfully');
-      // Clear any temporary state, sync data, show welcome screen, etc.
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'CACHE_UPDATE'
@@ -233,11 +161,15 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <TaskProvider>
-        <AppContent showModal={showModal} setShowModal={setShowModal} appReady={appReady} />
-      </TaskProvider>
-    </Router>
+    <TaskProvider>
+      <AppContent 
+        showModal={showModal} 
+        setShowModal={setShowModal} 
+        appReady={appReady}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+      />
+    </TaskProvider>
   );
 }
 

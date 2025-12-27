@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -29,8 +28,7 @@ const CATEGORIES = [
   { name: 'خير', icon: Heart, color: 'text-emerald-600', bg: 'bg-emerald-50' }
 ];
 
-const AddTask = () => {
-  const navigate = useNavigate();
+const AddTask = ({ setCurrentView }) => {
   const { addTask } = useTaskContext();
   const { intentions, addIntention } = useIntentions();
 
@@ -79,7 +77,11 @@ const AddTask = () => {
       setIntention('');
       setNewIntention('');
       setShowNewIntentionInput(false);
-      setTimeout(() => setSuccess(false), 2000);
+      // Return to home after successful save
+      setTimeout(() => {
+        setSuccess(false);
+        setCurrentView('home');
+      }, 1500);
     } else {
       setError('فشل في إضافة المهمة');
     }
@@ -92,7 +94,7 @@ const AddTask = () => {
         <div className="absolute inset-0 glass border-b border-white/20" />
         <div className="relative px-4 py-4 flex items-center justify-between">
           <motion.button
-            onClick={() => navigate('/', { replace: true })}
+            onClick={() => setCurrentView('home')}
             className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

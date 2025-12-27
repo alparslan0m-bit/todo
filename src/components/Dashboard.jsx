@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyCategoryTheme, resetTheme } from '../utils/dynamicTheme';
 import {
@@ -22,8 +21,7 @@ import { useTaskContext } from '../context/TaskContext';
 
 const CATEGORIES = ['عبادات', 'علم', 'عمل', 'أسرة', 'نفس', 'خير'];
 
-const Dashboard = ({ onShowModal }) => {
-  const navigate = useNavigate();
+const Dashboard = ({ onShowModal, setCurrentView }) => {
   const { tasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [greeting, setGreeting] = useState({ text: 'صباح الخير', icon: Sun });
@@ -144,7 +142,7 @@ const Dashboard = ({ onShowModal }) => {
               استثمر وقتك وأضف مهاماً جديدة لزيادة إنتاجيتك اليوم.
             </p>
             <motion.button
-              onClick={() => navigate('/add', { replace: true })}
+              onClick={() => setCurrentView('add')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="group flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all hover:shadow-primary/40"
