@@ -1,84 +1,60 @@
 /**
- * Navigation Component
- * Single-page app navigation - no routes, just state management
- * Uses CSS Grid and safe-area-inset for perfect mobile adaptation
+ * Navigation Component - iOS Tab Bar Edition
+ * A refined tab bar following Apple Human Interface Guidelines
  */
 
 import React from 'react';
 import { Home, Plus, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useHaptic } from '../hooks/useHaptic';
 
 const Navigation = ({ currentView, setCurrentView }) => {
-  const { triggerHaptic } = useHaptic();
-
   const navItems = [
-    { id: 'home', label: 'الرئيسية', icon: Home },
+    { id: 'home', label: 'مهامي', icon: Home },
     { id: 'add', label: 'إضافة', icon: Plus },
     { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 
   const handleNavClick = (viewId) => {
-    triggerHaptic(10); // Light tap
+    if (window.navigator.vibrate) window.navigator.vibrate(5);
     setCurrentView(viewId);
   };
 
   return (
-    <nav className="fixed inset-0 pointer-events-none z-50" style={{ insetBlockEnd: 0, insetInlineStart: 0, insetInlineEnd: 0 }}>
-      <div className="flex justify-center px-4 absolute inset-x-0 bottom-0 pointer-events-none" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-        {/* Single-page navigation dock with safe-area support */}
-        <motion.div
-          className="nav-dock pointer-events-auto"
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.2 }}
-        >
-          {navItems.map((item, index) => {
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      {/* iOS Tab Bar Material */}
+      <div className="bg-[#F9F9F9]/80 backdrop-blur-2xl border-t border-primary/[0.05] pb-safe-bottom">
+        <div className="h-14 flex items-center justify-around px-2">
+          {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
 
             return (
-              <motion.button
+              <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${isActive
-                    ? 'text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                style={{
-                  background: isActive ? 'var(--primary)' : 'transparent',
-                  transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.92 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  type: 'spring',
-                  damping: 20,
-                  stiffness: 300,
-                  delay: index * 0.05,
-                }}
+                className="flex flex-col items-center justify-center flex-1 transition-all"
               >
-                <Icon size={20} strokeWidth={2.5} />
-
-                {/* Subtle glow for active item */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      boxShadow: '0 0 20px var(--primary)',
-                      opacity: 0.3,
-                    }}
-                    initial={{ opacity: 0, scale: 1.5 }}
-                    animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                <div className={`relative ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
+                  <Icon
+                    size={24}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className="transition-all"
                   />
-                )}
-              </motion.button>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-dot"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"
+                    />
+                  )}
+                </div>
+                <span className={`text-[10px] mt-1 font-medium transition-colors ${isActive ? 'text-primary' : 'text-text-secondary'
+                  }`}>
+                  {item.label}
+                </span>
+              </button>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </nav>
   );

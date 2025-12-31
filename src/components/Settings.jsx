@@ -1,150 +1,161 @@
 /**
- * Settings Component
- * About information and data management
- * Single-page app state management (no routing)
+ * Settings Component - Apple Native Edition
+ * iOS-inspired settings interface with grouped sections and material design.
  */
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Trash2, ShieldAlert, BadgeInfo } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronLeft,
+  Trash2,
+  ShieldAlert,
+  BadgeInfo,
+  ChevronRight,
+  Info,
+  Database,
+  User,
+  Activity
+} from 'lucide-react';
 import { clearAllData } from '../utils/storage';
 
 const Settings = ({ setCurrentView }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [backupMessage, setBackupMessage] = useState('');
 
-
-
-  // Handle clear all data
   const handleClearAll = () => {
     if (clearAllData()) {
       setShowConfirmDelete(false);
       setBackupMessage('✓ تم حذف جميع البيانات');
+      if (window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]);
       setTimeout(() => {
         window.location.reload();
       }, 1500);
     }
   };
 
-  return (
-    <div className="px-4 py-4 pb-20">
-      {/* Header */}
-      <div className="pt-safe-top sticky top-0 z-30">
-        <div className="absolute inset-0 glass border-b border-white/20" />
-        <div className="relative px-4 py-4 flex items-center justify-between">
-          <motion.button
-            onClick={() => setCurrentView('home')}
-            className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ArrowRight size={24} />
-          </motion.button>
-          <h1 className="text-xl font-bold text-gray-800">الإعدادات</h1>
-          <div className="w-10" /> {/* Spacer */}
-        </div>
+  const SettingRow = ({ icon: Icon, label, value, onClick, destructive, last }) => (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 p-4 bg-white active:bg-gray-100 transition-colors ${!last ? 'border-b border-primary/[0.05]' : ''
+        }`}
+    >
+      <div className={`p-1.5 rounded-md ${destructive ? 'bg-red-500 text-white' : 'bg-gray-100 text-text-secondary'}`}>
+        <Icon size={18} strokeWidth={destructive ? 3 : 2} />
       </div>
+      <span className={`text-[17px] font-medium flex-1 text-right ${destructive ? 'text-red-500' : 'text-text-main'}`}>
+        {label}
+      </span>
+      {value && <span className="text-[17px] text-text-secondary mr-2">{value}</span>}
+      {!value && !destructive && <ChevronLeft size={16} className="text-text-tertiary" />}
+    </button>
+  );
 
-      {/* Messages */}
-      {backupMessage && (
-        <motion.div
-          className="max-w-2xl mx-auto px-4 mt-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-        >
-          <div className={`px-4 py-3 rounded-2xl flex items-center gap-2 ${backupMessage.includes('✓')
-            ? 'bg-green-100 text-green-700'
-            : 'bg-red-100 text-red-700'
-            }`}>
-            <span className="font-bold">{backupMessage}</span>
-          </div>
-        </motion.div>
-      )}
+  return (
+    <div className="min-h-screen bg-[#F2F2F7] flex flex-col">
+      {/* iOS Navigation Bar */}
+      <header className="sticky top-0 z-50 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-primary/[0.05]">
+        <div className="h-14 px-4 flex items-center justify-between">
+          <div className="w-16" /> {/* Spacer */}
+          <h1 className="text-[17px] font-semibold text-text-main">الإعدادات</h1>
+          <button
+            onClick={() => setCurrentView('home')}
+            className="text-primary text-[17px] font-semibold active:opacity-30 transition-opacity w-16 text-left"
+          >
+            تم
+          </button>
+        </div>
+      </header>
 
-      {/* Settings Content */}
-      <motion.div
-        className="max-w-2xl mx-auto px-5 py-6 space-y-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
-
-
-        {/* About Section */}
-        <motion.div
-          className="glass-card rounded-3xl p-6"
-          whileHover={{ y: -2 }}
-        >
-          <h2 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
-            <BadgeInfo className="text-primary" />
-            عن التطبيق
-          </h2>
-          <div className="space-y-4 text-gray-600 leading-relaxed">
-            <p className="font-bold text-gray-900">تودو - أن تكون أعمالنا كلها لله</p>
-            <p>
-              يساعدك على إدارة مهامك اليومية مع التذكير بالنية في أعمالك.
-            </p>
-            <div className="flex gap-4 text-sm bg-slate-50 p-4 rounded-2xl">
-              <div>
-                <strong>الإصدار:</strong><br />1.0.0
-              </div>
-              <div className="h-full w-px bg-gray-200" />
-              <div>
-                <strong>المطور:</strong><br /> محمد عبد العزيز
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Danger Zone */}
-        <motion.div
-          className="border border-red-100 rounded-3xl p-6 bg-red-50/50"
-        >
-          <h2 className="text-lg font-bold text-red-700 mb-2 flex items-center gap-2">
-            <ShieldAlert className="text-red-600" />
-            منطقة الخطر
-          </h2>
-          <p className="text-red-600/80 text-sm mb-6">
-            هذه الإجراءات لا يمكن التراجع عنها
-          </p>
-          {!showConfirmDelete ? (
-            <motion.button
-              onClick={() => setShowConfirmDelete(true)}
-              className="w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-4 px-4 rounded-2xl transition-colors duration-200 flex items-center justify-center gap-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Trash2 size={20} />
-              حذف جميع البيانات
-            </motion.button>
-          ) : (
+      <main className="flex-1 overflow-y-auto pt-6 pb-20 max-w-xl mx-auto w-full">
+        {/* Success Message */}
+        <AnimatePresence>
+          {backupMessage && (
             <motion.div
-              className="space-y-3"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="px-6 mb-6"
             >
-              <p className="font-bold text-center text-red-700 mb-2">هل أنت متأكد تماماً؟</p>
-              <div className="flex gap-3">
-                <motion.button
-                  onClick={() => setShowConfirmDelete(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition-colors"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  إلغاء
-                </motion.button>
-                <motion.button
-                  onClick={handleClearAll}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  حذف
-                </motion.button>
+              <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <span>{backupMessage}</span>
               </div>
             </motion.div>
           )}
-        </motion.div>
-      </motion.div>
+        </AnimatePresence>
+
+        <section className="space-y-8">
+          {/* Section: About */}
+          <div className="space-y-2">
+            <h2 className="px-6 text-[13px] font-medium text-text-secondary uppercase tracking-tight">عن التطبيق</h2>
+            <div className="bg-white rounded-[12px] overflow-hidden border border-primary/[0.02] shadow-sm mx-4">
+              <div className="p-6 flex flex-col items-center text-center gap-3 border-b border-primary/[0.05]">
+                <div className="w-20 h-20 rounded-[22px] bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                  <Activity size={40} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h3 className="text-[20px] font-bold text-text-main tracking-tight">تودو</h3>
+                  <p className="text-[14px] font-medium text-text-secondary max-w-[200px]">
+                    أن تكون أعمالنا كلها لله. تطبيق لإدارة مهامك بنيّة صالحة.
+                  </p>
+                </div>
+              </div>
+              <SettingRow icon={Info} label="الإصدار" value="1.2.0" last />
+              <SettingRow icon={User} label="المطور" value="محمد عبد العزيز" last />
+            </div>
+          </div>
+
+          {/* Section: Data Management */}
+          <div className="space-y-2">
+            <h2 className="px-6 text-[13px] font-medium text-text-secondary uppercase tracking-tight">إدارة البيانات</h2>
+            <div className="bg-white rounded-[12px] overflow-hidden border border-primary/[0.02] shadow-sm mx-4">
+              {!showConfirmDelete ? (
+                <SettingRow
+                  icon={Trash2}
+                  label="حذف جميع البيانات"
+                  destructive
+                  last
+                  onClick={() => setShowConfirmDelete(true)}
+                />
+              ) : (
+                <div className="p-6 flex flex-col items-center text-center gap-4 animate-in fade-in zoom-in duration-200">
+                  <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                    <ShieldAlert size={28} />
+                  </div>
+                  <div>
+                    <h4 className="text-[17px] font-bold text-text-main">هل أنت متأكد؟</h4>
+                    <p className="text-[13px] text-text-secondary px-4">سيتم حذف جميع المهام والنيات نهائياً</p>
+                  </div>
+                  <div className="flex w-full gap-3 mt-2">
+                    <button
+                      onClick={() => setShowConfirmDelete(false)}
+                      className="flex-1 py-3 bg-gray-100 rounded-xl text-[15px] font-bold text-text-main active:bg-gray-200 transition-colors"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      onClick={handleClearAll}
+                      className="flex-1 py-3 bg-red-500 rounded-xl text-[15px] font-bold text-white active:bg-red-600 shadow-lg shadow-red-500/20 transition-colors"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className="px-8 text-[12px] text-text-secondary font-medium leading-tight">
+              يتم تخزين جميع البيانات محلياً على جهازك لضمان الخصوصية.
+            </p>
+          </div>
+        </section>
+
+        {/* Footer Credit */}
+        <footer className="mt-12 mb-8 text-center px-6">
+          <p className="text-[13px] text-text-secondary font-medium">صُنع بإحسان لخدمة المسلمين</p>
+          <div className="mt-2 flex items-center justify-center gap-1 text-[13px] text-text-tertiary font-medium">
+            <span> 🤲❤️ To the pure soul of my mother  </span>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };

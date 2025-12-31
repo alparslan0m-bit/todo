@@ -15,7 +15,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Status Bar & Theme -->
-  <meta name="theme-color" content="#1A4D2E" />
+  <meta name="theme-color" content="#10B981" />
   <meta name="description" content="تطبيق إسلامي معاصر لإدارة المهام اليومية مع التركيز على تجديد النية والقصد." />
   <title>تودو - إدارة المهام بنية</title>
 
@@ -23,10 +23,6 @@
     * {
       -webkit-user-select: none;
       user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    body {
       -webkit-touch-callout: none;
     }
   </style>
@@ -42,7 +38,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 
-<body class="font-arabic bg-light text-primary">
+<body class="bg-[#F2F2F7]">
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
   <script>
@@ -53,42 +49,26 @@
           .then(registration => {
             console.log('[PWA] ServiceWorker registered');
 
-            // 1. Handle immediate update if waiting (from previous session)
             if (registration.waiting) {
-              console.log('[PWA] Update available from previous session');
               window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration }));
             }
 
-            // 2. Handle future updates (detect new SW while current one is running)
             registration.onupdatefound = () => {
               const installingWorker = registration.installing;
-              console.log('[PWA] New service worker installing...');
-
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // A new service worker is waiting to activate
-                  console.log('[PWA] Update available - new SW installed and waiting');
                   window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration }));
                 }
               };
             };
-
-            // 3. Check for updates periodically (every 60 seconds)
-            setInterval(() => {
-              registration.update().catch(err => {
-                console.warn('[PWA] Update check failed:', err);
-              });
-            }, 60000);
           })
           .catch(err => {
             console.error('[PWA] ServiceWorker registration failed:', err);
           });
 
-        // 4. Reload page when new service worker takes over (after user clicks update)
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           if (!refreshing) {
-            console.log('[PWA] New SW activated, reloading page');
             window.location.reload();
             refreshing = true;
           }
@@ -96,36 +76,13 @@
       });
     }
 
-    // Install prompt handling for Android - Shared via Window
+    // Install prompt handling
     window.deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       window.deferredPrompt = e;
-      console.log('[PWA] Global beforeinstallprompt captured');
-
-      // Dispatch custom event for React components to listen to
       window.dispatchEvent(new CustomEvent('pwa-prompt-available'));
     });
-
-    // Listen for app installation
-    window.addEventListener('appinstalled', () => {
-      console.log('[PWA] App successfully installed');
-      deferredPrompt = null;
-      // Log installation metrics
-      if ('sendBeacon' in navigator) {
-        navigator.sendBeacon('/api/install-metrics', JSON.stringify({
-          installed: true,
-          timestamp: new Date().toISOString()
-        }));
-      }
-    });
-
-    // Prevent elastic bounce on iOS
-    document.addEventListener('touchmove', e => {
-      if (e.target.closest('.page-wrapper') === null) {
-        e.preventDefault();
-      }
-    }, { passive: false });
   </script>
 </body>
 

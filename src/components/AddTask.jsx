@@ -1,31 +1,34 @@
 /**
- * AddTask Component
- * Premium form for adding new tasks
+ * AddTask Component - Apple Native Edition
+ * A premium, iOS-inspired task creation interface following Human Interface Guidelines.
  */
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight,
+  X,
+  Plus,
+  Check,
   Moon,
   BookOpen,
   Briefcase,
   Users,
   Smile,
   Heart,
-  Plus,
-  Check
+  Type,
+  Sparkles,
+  ChevronLeft
 } from 'lucide-react';
 import { useTaskContext } from '../context/TaskContext';
 import { useIntentions } from '../hooks/useIntentions';
 
 const CATEGORIES = [
-  { name: 'عبادات', icon: Moon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { name: 'علم', icon: BookOpen, color: 'text-teal-600', bg: 'bg-teal-50' },
-  { name: 'عمل', icon: Briefcase, color: 'text-slate-600', bg: 'bg-slate-50' },
-  { name: 'أسرة', icon: Users, color: 'text-rose-600', bg: 'bg-rose-50' },
-  { name: 'نفس', icon: Smile, color: 'text-amber-600', bg: 'bg-amber-50' },
-  { name: 'خير', icon: Heart, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+  { name: 'عبادات', icon: Moon, color: '#5856D6', bg: '#F2F2F7' },
+  { name: 'علم', icon: BookOpen, color: '#30B0C7', bg: '#F2F2F7' },
+  { name: 'عمل', icon: Briefcase, color: '#8E8E93', bg: '#F2F2F7' },
+  { name: 'أسرة', icon: Users, color: '#FF2D55', bg: '#F2F2F7' },
+  { name: 'نفس', icon: Smile, color: '#FF9500', bg: '#F2F2F7' },
+  { name: 'خير', icon: Heart, color: '#34C759', bg: '#F2F2F7' }
 ];
 
 const AddTask = ({ setCurrentView }) => {
@@ -41,17 +44,13 @@ const AddTask = ({ setCurrentView }) => {
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess(false);
-
+    if (e) e.preventDefault();
     if (!title.trim()) {
       setError('يرجى إدخال عنوان المهمة');
       return;
     }
-
     if (!intention && !newIntention.trim()) {
-      setError('يرجى اختيار أو إضافة نية');
+      setError('يرجى اختيار نية');
       return;
     }
 
@@ -67,171 +66,202 @@ const AddTask = ({ setCurrentView }) => {
     const task = {
       title: title.trim(),
       category,
-      intention: finalIntention
+      intention: finalIntention,
+      createdAt: new Date().toISOString()
     };
 
     if (addTask(task)) {
       setSuccess(true);
-      setTitle('');
-      setCategory('عبادات');
-      setIntention('');
-      setNewIntention('');
-      setShowNewIntentionInput(false);
-      // Return to home after successful save
+      if (window.navigator.vibrate) window.navigator.vibrate([10, 30, 10]); // Premium haptic sequence
+
       setTimeout(() => {
-        setSuccess(false);
         setCurrentView('home');
-      }, 1500);
-    } else {
-      setError('فشل في إضافة المهمة');
+      }, 1000);
     }
   };
 
   return (
-    <div className="px-4 py-4 pb-24">
-      {/* Header */}
-      <div className="pt-safe-top sticky top-0 z-30">
-        <div className="absolute inset-0 glass border-b border-white/20" />
-        <div className="relative px-4 py-4 flex items-center justify-between">
-          <motion.button
+    <div className="min-h-screen bg-[#F2F2F7] flex flex-col">
+      {/* iOS Navigation Bar */}
+      <header className="sticky top-0 z-50 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-primary/[0.05]">
+        <div className="h-14 px-4 flex items-center justify-between">
+          <button
             onClick={() => setCurrentView('home')}
-            className="p-2 -mr-2 text-gray-600 hover:text-primary transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            className="text-primary text-[17px] active:opacity-40 transition-opacity"
           >
-            <ArrowRight size={24} />
-          </motion.button>
-          <h1 className="text-xl font-bold text-gray-800">مهمة جديدة</h1>
-          <div className="w-10" /> {/* Spacer */}
-        </div>
-      </div>
-
-      <motion.form
-        onSubmit={handleSubmit}
-        className="max-w-2xl mx-auto px-5 py-6 space-y-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        {/* Messages */}
-        {(error || success) && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-4 rounded-2xl flex items-center gap-3 ${success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}
+            إلغاء
+          </button>
+          <h1 className="text-[17px] font-semibold text-text-main">مهمة جديدة</h1>
+          <button
+            onClick={handleSubmit}
+            disabled={!title.trim()}
+            className="text-primary text-[17px] font-semibold disabled:opacity-30 active:opacity-40 transition-opacity"
           >
-            {success ? <Check size={20} /> : null}
-            <span className="font-semibold">{error || 'تمت الإضافة بنجاح!'}</span>
-          </motion.div>
-        )}
-
-        {/* Title */}
-        <div className="space-y-4">
-          <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">عنوان المهمة</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="ماذا تود أن تنجز؟"
-            className="w-full text-2xl font-bold bg-transparent border-none placeholder-gray-300 focus:ring-0 px-0 py-2"
-            autoFocus
-          />
-          <div className="h-px bg-gray-200" />
+            إضافة
+          </button>
         </div>
+      </header>
 
-        {/* Categories */}
-        <div className="space-y-4">
-          <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">الفئة</label>
-          <div className="grid grid-cols-3 gap-3">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = category === cat.name;
-              return (
-                <motion.button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => setCategory(cat.name)}
-                  layout
-                  className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-colors ${isSelected
-                    ? `${cat.bg} ${cat.color} border-current shadow-lg`
-                    : 'bg-white border-transparent hover:bg-gray-50'
-                    }`}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Icon size={24} strokeWidth={2} className="mb-2" />
-                  <span className="text-xs font-bold">{cat.name}</span>
-                </motion.button>
-              );
-            })}
+      <main className="flex-1 overflow-y-auto px-4 py-8 space-y-7 max-w-xl mx-auto w-full">
+        {/* Error State */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="bg-white rounded-xl p-3 border border-red-100 flex items-center gap-2"
+            >
+              <div className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px]">
+                <X size={12} />
+              </div>
+              <span className="text-red-600 text-[14px] font-medium">{error}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Section: Title */}
+        <div className="space-y-2">
+          <h2 className="px-4 text-[13px] font-medium text-text-secondary uppercase tracking-tight">ما هي المهمة؟</h2>
+          <div className="bg-white rounded-[12px] overflow-hidden border border-primary/[0.02] shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+            <div className="p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Type size={18} />
+              </div>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setError('');
+                }}
+                placeholder="مثلاً: صلاة الضحى"
+                className="flex-1 bg-transparent border-none focus:ring-0 p-0 text-[17px] placeholder:text-text-tertiary text-text-main"
+              />
+              {title && (
+                <button onClick={() => setTitle('')} className="bg-text-tertiary text-white rounded-full p-0.5">
+                  <X size={12} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Intentions */}
-        <div className="space-y-4">
-          <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">النية</label>
-          <div className="flex flex-wrap gap-2">
-            {intentions.map(int => (
-              <motion.button
-                key={int}
-                type="button"
-                onClick={() => {
-                  setIntention(int);
-                  setNewIntention('');
-                  setShowNewIntentionInput(false);
-                }}
-                layout
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${intention === int && !showNewIntentionInput
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+        {/* Section: Category */}
+        <div className="space-y-2">
+          <h2 className="px-4 text-[13px] font-medium text-[#8E8E93] uppercase">الفئة</h2>
+          <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.02] p-4">
+            <div className="grid grid-cols-3 gap-6">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.name}
+                  onClick={() => setCategory(cat.name)}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div
+                    className={`w-14 h-14 rounded-[14px] flex items-center justify-center transition-all duration-200 ${category === cat.name
+                      ? 'scale-110 shadow-lg'
+                      : 'opacity-40 grayscale-[0.2]'
+                      }`}
+                    style={{ backgroundColor: cat.color }}
+                  >
+                    <cat.icon size={28} color="white" strokeWidth={2.5} />
+                  </div>
+                  <span className={`text-[12px] font-semibold transition-colors ${category === cat.name ? 'text-black' : 'text-[#8E8E93]'
+                    }`}>
+                    {cat.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Intention */}
+        <div className="space-y-2">
+          <h2 className="px-4 text-[13px] font-medium text-text-secondary uppercase">النية</h2>
+          <div className="bg-white rounded-2xl border border-primary/[0.02] p-4">
+            <div className="flex flex-wrap gap-2 mb-4">
+              {intentions.map((int) => (
+                <button
+                  key={int}
+                  onClick={() => {
+                    setIntention(int);
+                    setNewIntention('');
+                    setShowNewIntentionInput(false);
+                  }}
+                  className={`px-4 py-2 rounded-full text-[14px] font-medium transition-all ${intention === int && !showNewIntentionInput
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-[#F2F2F7] text-text-main active:bg-[#E5E5EA]'
+                    }`}
+                >
+                  {int}
+                </button>
+              ))}
+              <button
+                onClick={() => setShowNewIntentionInput(!showNewIntentionInput)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${showNewIntentionInput
+                  ? 'bg-primary text-white rotate-45'
+                  : 'bg-primary/10 text-primary'
                   }`}
               >
-                {int}
-              </motion.button>
-            ))}
-            <motion.button
-              type="button"
-              onClick={() => setShowNewIntentionInput(true)}
-              layout
-              className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 transition-colors ${showNewIntentionInput ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
-                }`}
-            >
-              <Plus size={16} />
-              جديدة
-            </motion.button>
-          </div>
+                <Plus size={20} />
+              </button>
+            </div>
 
-          {/* New Intention Input */}
-          <AnimatePresence mode="wait">
-            {showNewIntentionInput && (
-              <motion.input
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 50 }}
-                exit={{ opacity: 0, height: 0 }}
-                type="text"
-                value={newIntention}
-                onChange={(e) => {
-                  setNewIntention(e.target.value);
-                  setIntention('');
-                }}
-                placeholder="اكتب نيتك هنا..."
-                className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-              />
-            )}
-          </AnimatePresence>
+            <AnimatePresence>
+              {showNewIntentionInput && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="pt-2 border-t border-[#F2F2F7]"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={16} className="text-[#FF9500]" />
+                    <input
+                      type="text"
+                      placeholder="أضف نية جديدة..."
+                      value={newIntention}
+                      onChange={(e) => {
+                        setNewIntention(e.target.value);
+                        setIntention('');
+                      }}
+                      className="flex-1 bg-transparent border-none focus:ring-0 p-2 text-[15px]"
+                      autoFocus
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Submit */}
-        <motion.button
-          type="submit"
-          disabled={!title}
-          className="w-full bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-primary/30 disabled:opacity-50 disabled:shadow-none"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          حفظ المهمة
-        </motion.button>
+        {/* Success Feedback */}
+        <AnimatePresence>
+          {success && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
+            >
+              <div className="bg-white/80 backdrop-blur-2xl p-8 rounded-[30px] shadow-2xl flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white">
+                  <Check size={32} strokeWidth={3} />
+                </div>
+                <span className="text-[17px] font-bold text-text-main tracking-tight">تم الحفظ</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
 
-      </motion.form>
+      {/* Footer Quote */}
+      <footer className="p-6 text-center">
+        <p className="text-[13px] text-[#8E8E93] font-medium leading-relaxed italic">
+          "إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى"
+        </p>
+      </footer>
     </div>
   );
 };

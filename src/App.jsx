@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGesture } from '@use-gesture/react';
 import Dashboard from './components/Dashboard';
 import AddTask from './components/AddTask';
@@ -31,59 +31,42 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
   const appShellRef = useRef(null);
   const hapticTriggeredRef = useRef(false);
 
-  // Enhanced logarithmic rubberband formula: ultra-smooth resistance
-  // Feels premium and organic, not robotic
+  // Optimized Apple Rubberband Physics
   const calculateResistance = (movement) => {
-    // More aggressive initial response, then smooth decay
-    return (movement * 0.6) / (1 + (movement * 0.008));
+    return (movement * 0.5) / (1 + (movement * 0.007));
   };
 
-  // Reset bounce state when view changes (important for SPA)
   useEffect(() => {
     setPullY(0);
     setIsDragging(false);
     hapticTriggeredRef.current = false;
-    
-    // Scroll to top when switching views
-    const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
-    if (pageWrapper) {
-      pageWrapper.scrollTop = 0;
-    }
   }, [currentView]);
 
-  // Global elastic bounce gesture - Optimized for SPA
   const bind = useGesture({
     onDrag: ({ movement: [, my], last, direction: [, dy], event, cancel }) => {
-      // Detect scroll position in single page wrapper
       const pageWrapper = appShellRef.current?.querySelector('.page-wrapper');
       const isAtTop = pageWrapper?.scrollTop === 0;
 
-      // Cancel guard: if not at top OR dragging upward, let normal scrolling happen
       if (!isAtTop || dy < 0) {
-        cancel();
+        if (isDragging) setIsDragging(false);
         return;
       }
 
-      // Only allow pull-down when at top of scroll
       if (isAtTop && dy > 0 && !last) {
         event.preventDefault();
         setIsDragging(true);
-
-        // Enhanced logarithmic resistance: premium smooth physics
         const stretchedY = calculateResistance(my);
         setPullY(stretchedY);
 
-        // Single haptic trigger at optimal stretch point (not repeated)
-        if (stretchedY >= 25 && !hapticTriggeredRef.current) {
+        if (stretchedY >= 35 && !hapticTriggeredRef.current) {
           hapticTriggeredRef.current = true;
-          triggerHaptic(8); // Stronger haptic for premium feel
+          triggerHaptic(10);
         }
       }
 
-      // On release, trigger spring animation back to zero
       if (last) {
         setIsDragging(false);
-        hapticTriggeredRef.current = false; // Reset for next gesture
+        hapticTriggeredRef.current = false;
       }
     },
   });
@@ -92,45 +75,33 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
     return <SplashScreen onComplete={() => { }} />;
   }
 
-  // Render the appropriate view based on currentView state (no routing)
-  const renderView = () => {
-    switch (currentView) {
-      case 'add':
-        return <AddTask setCurrentView={setCurrentView} />;
-      case 'settings':
-        return <Settings setCurrentView={setCurrentView} />;
-      case 'home':
-      default:
-        return <Dashboard onShowModal={() => setShowModal(true)} setCurrentView={setCurrentView} />;
-    }
-  };
-
   return (
     <div className="app-viewport" dir="rtl" ref={appShellRef} {...bind()}>
-      {/* Global Elastic Bounce Shell with Enhanced Cinematic Effects */}
       <motion.div
+        className="flex-1 flex flex-col relative overflow-hidden"
         animate={{
           y: !isDragging ? 0 : pullY,
-          scale: !isDragging ? 1 : Math.max(0.97, 1 - pullY * 0.008), // Stronger scale effect
-          boxShadow: !isDragging
-            ? '0 0 0 rgba(0, 0, 0, 0)'
-            : `0 ${Math.min(pullY * 0.6, 25)}px ${Math.min(pullY * 2, 60)}px rgba(0, 0, 0, ${Math.min(pullY * 0.025, 0.4)})` // Enhanced depth shadow
+          scale: !isDragging ? 1 : Math.max(0.96, 1 - pullY * 0.0005),
+          borderRadius: !isDragging ? '0px' : '38px',
         }}
-        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 140, damping: 22 }} // Even smoother spring
-        style={{ 
-          height: '100%', 
-          transformOrigin: 'center top', 
-          position: 'relative', 
-          zIndex: 10,
-          WebkitUserSelect: 'none',
-          userSelect: 'none'
-        }}
+        transition={isDragging ? { type: 'tween', duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
+        style={{ transformOrigin: 'center top', backgroundColor: 'var(--bg-system)' }}
       >
-        {/* Single page wrapper - optimized for SPA */}
-        <div className="page-wrapper">
-          <div className="font-arabic text-text-main">
-            {renderView()}
-          </div>
+        <div className="page-wrapper no-scrollbar">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentView}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.02, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              className="min-h-full"
+            >
+              {currentView === 'add' && <AddTask setCurrentView={setCurrentView} />}
+              {currentView === 'settings' && <Settings setCurrentView={setCurrentView} />}
+              {currentView === 'home' && <Dashboard onShowModal={() => setShowModal(true)} setCurrentView={setCurrentView} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
         <Navigation currentView={currentView} setCurrentView={setCurrentView} />
         <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
@@ -187,9 +158,9 @@ function App() {
 
   return (
     <TaskProvider>
-      <AppContent 
-        showModal={showModal} 
-        setShowModal={setShowModal} 
+      <AppContent
+        showModal={showModal}
+        setShowModal={setShowModal}
         appReady={appReady}
         currentView={currentView}
         setCurrentView={setCurrentView}

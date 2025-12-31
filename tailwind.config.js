@@ -3,35 +3,32 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: 'class', // Lock dark mode to manual class control only
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        primary: '#1A4D2E', // Deep Emerald
-        secondary: '#4F6F52', // Sage
-        accent: '#FF9F29', // Golden warmth
-        sand: '#F5EFE6', // Light Sand
-        light: '#FAF9F6', // Off-white
-        surface: '#FFFFFF',
-        success: '#1A4D2E',
-        danger: '#CF5C5C',
+        primary: '#059669', // Rich Emerald
+        secondary: '#0D9488', // Deep Teal
+        accent: '#D97706', // Amber/Gold
+        system: '#F2F4F3', // Warm Sage Tint
+        success: '#15803D',
+        danger: '#DC2626',
         text: {
-          main: '#1A1A1A',
-          muted: '#666666',
-          light: '#999999'
+          main: '#062C24', // Deepest Pine Green
+          secondary: '#4A635D', // Slate Sage
+          tertiary: '#9CA3AF'
         }
       },
       fontFamily: {
-        arabic: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'],
+        arabic: ['Cairo', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+        'apple': '0 8px 32px 0 rgba(0, 0, 0, 0.05)',
         'premium': '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
-        'glow': '0 0 20px rgba(26, 77, 46, 0.3)',
       },
-      backgroundImage: {
-        'gradient-premium': 'linear-gradient(135deg, #FAF9F6 0%, #F5EFE6 100%)',
-        'gradient-card': 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+      borderRadius: {
+        'ios': '12px',
+        'squircle': '22px',
       }
     },
   },

@@ -1,68 +1,57 @@
 /**
- * TaskModal Component
- * Displays a modal when task is completed with Islamic acknowledgment message
+ * TaskModal Component - Apple Native Edition
+ * A premium feedback modal following iOS Alert patterns.
  */
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check } from 'lucide-react';
 
 const TaskModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
-      <div className="bg-light rounded-lg shadow-lg p-8 max-w-sm mx-4 text-center animate-slideUp">
-        {/* Icon and Message */}
-        <div className="mb-6">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-2xl font-bold text-primary mb-2">تم</h2>
-          <p className="text-lg text-blue font-semibold">
-            نحتسبها عند الله 🌱
-          </p>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          {/* Backdrop Blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+          />
+
+          {/* iOS Alert Card */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="relative w-full max-w-[280px] bg-white/80 backdrop-blur-2xl rounded-[14px] overflow-hidden shadow-2xl border border-white/40"
+          >
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-[#34C759] flex items-center justify-center text-white mb-4">
+                <Check size={32} strokeWidth={3} />
+              </div>
+              <h2 className="text-[17px] font-bold text-black tracking-tight mb-1">تمت المهمة!</h2>
+              <p className="text-[14px] font-medium text-black/60 leading-tight">
+                نحتسبها عند الله 🌱<br />تقبل الله منك صالح الأعمال.
+              </p>
+            </div>
+
+            {/* Apple Style Buttons */}
+            <div className="border-t border-black/[0.05] flex">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 text-[17px] font-bold text-[#007AFF] active:bg-black/[0.05] transition-colors"
+                autoFocus
+              >
+                حسناً
+              </button>
+            </div>
+          </motion.div>
         </div>
-
-        {/* Divider */}
-        <div className="border-b border-sand mb-6"></div>
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="w-full bg-primary hover:bg-accent text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
-        >
-          حسناً
-        </button>
-      </div>
-
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-      `}</style>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 

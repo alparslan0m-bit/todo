@@ -37,7 +37,7 @@ export const initializeDynamicTheme = () => {
 export const updateMetaTheme = () => {
   const computedStyle = getComputedStyle(document.documentElement);
   const primaryColor = computedStyle.getPropertyValue('--primary').trim();
-  
+
   // Convert hex to proper format if needed
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme && primaryColor) {
@@ -66,12 +66,12 @@ export const getPrimaryColor = () => {
  * Category color mapping with dynamic meta theme sync
  */
 export const CATEGORY_COLORS = {
-  'عبادات': '#6366F1', // Indigo
-  'علم': '#14B8A6',    // Teal
-  'عمل': '#64748B',    // Slate
-  'أسرة': '#F43F5E',   // Rose
-  'نفس': '#F59E0B',    // Amber
-  'خير': '#10B981',    // Emerald
+  'عبادات': '#5856D6',
+  'علم': '#30B0C7',
+  'عمل': '#8E8E93',
+  'أسرة': '#FF2D55',
+  'نفس': '#FF9500',
+  'خير': '#34C759',
 };
 
 /**
@@ -86,8 +86,7 @@ export const applyCategoryTheme = (category) => {
 
 /**
  * Reset to default light theme
- * Light Mode Only: Always uses light theme color
  */
 export const resetTheme = () => {
-  changePrimaryColor('#1A4D2E'); // Light theme default
+  changePrimaryColor('#007AFF');
 };

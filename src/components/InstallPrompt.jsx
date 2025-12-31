@@ -12,13 +12,11 @@ const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
-    // 1. Check if event was already captured by index.html
     if (window.deferredPrompt) {
       setDeferredPrompt(window.deferredPrompt);
       setTimeout(() => setShowPrompt(true), 2000);
     }
 
-    // 2. Listen for future captures
     const handleCapture = () => {
       if (window.deferredPrompt) {
         setDeferredPrompt(window.deferredPrompt);
@@ -33,7 +31,6 @@ const InstallPrompt = () => {
       setTimeout(() => setShowPrompt(true), 2000);
     });
 
-    // Check if app is already installed
     if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
       setShowPrompt(false);
     }
@@ -62,63 +59,44 @@ const InstallPrompt = () => {
     <AnimatePresence>
       {showPrompt && deferredPrompt && (
         <motion.div
-          className="fixed bottom-24 left-4 right-4 z-40 md:left-auto md:right-8 md:w-80"
+          className="fixed bottom-28 left-4 right-4 z-40 max-w-sm mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 400 }}
         >
-          <div className="glass rounded-2xl p-4 shadow-xl">
-            <div className="flex items-start gap-3">
-              {/* Icon */}
-              <motion.div
-                className="p-2.5 bg-primary/10 rounded-lg flex-shrink-0"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Download size={20} className="text-primary" />
-              </motion.div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-text-main text-sm mb-1">
-                  ثبّت تطبيق تودو
-                </h3>
-                <p className="text-text-secondary text-xs">
-                  احصل على وصول أسرع وتجربة أفضل على جهازك
-                </p>
+          <div className="bg-white/80 backdrop-blur-2xl rounded-[22px] p-5 shadow-2xl border border-white/40">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-[14px] bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                <Download size={24} strokeWidth={2.5} />
               </div>
 
-              {/* Close button */}
-              <motion.button
+              <div className="flex-1">
+                <h3 className="text-[17px] font-bold text-text-main tracking-tight leading-tight">ثبّت تودو</h3>
+                <p className="text-[13px] font-medium text-text-main/50 leading-tight mt-0.5">احصل على التجربة الكاملة</p>
+              </div>
+
+              <button
                 onClick={handleDismiss}
-                className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                className="p-1 text-text-main/20 hover:text-text-main/40"
               >
-                <X size={16} className="text-text-secondary" />
-              </motion.button>
+                <X size={20} />
+              </button>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 mt-3">
-              <motion.button
+            <div className="flex gap-3 mt-5">
+              <button
                 onClick={handleDismiss}
-                className="flex-1 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-gray-100 rounded-lg transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="flex-1 py-3 text-[15px] font-bold text-text-main/60 bg-primary/5 rounded-xl active:bg-primary/10 transition-colors"
               >
-                لاحقاً
-              </motion.button>
-              <motion.button
+                ليس الآن
+              </button>
+              <button
                 onClick={handleInstall}
-                className="flex-1 px-3 py-2 text-xs font-bold text-white bg-primary hover:bg-emerald-700 rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="flex-1 py-3 text-[15px] font-bold text-white bg-primary rounded-xl active:opacity-60 shadow-lg shadow-primary/20 transition-opacity"
               >
-                <Download size={14} />
-                ثبّت
-              </motion.button>
+                تثبيت
+              </button>
             </div>
           </div>
         </motion.div>
