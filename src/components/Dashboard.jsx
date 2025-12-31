@@ -59,7 +59,7 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
   const GreetingIcon = greeting.icon;
 
   return (
-    <div className="bg-[#F2F2F7] pb-32 bounce-padding">
+    <div className="bg-[#F2F2F7] pb-32">
       {/* iOS Status Bar & Top Actions */}
       <header className="sticky top-0 z-40 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-black/[0.03]">
         <div className="pt-safe-top h-14 px-5 flex items-center justify-between">
@@ -92,36 +92,38 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
         </section>
 
         {/* Category Filter Pills - Apple Style with Scroll Snap */}
-        <section className="mb-8 overflow-x-auto no-scrollbar scroll-snap-x mask-gradient-right px-6">
-          <div className="flex gap-2.5 min-w-max">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-5 py-2 rounded-full text-[14px] font-semibold transition-all ${selectedCategory === null
-                ? 'bg-primary text-white'
-                : 'bg-white text-text-main border border-primary/[0.05]'
-                }`}
-            >
-              الكل
-            </button>
-            {CATEGORIES.map(cat => (
+        <section className="mb-8">
+          <div className="overflow-x-auto no-scrollbar scroll-snap-x" style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-y' }}>
+            <div className="flex gap-2.5 min-w-max px-6">
               <button
-                key={cat.name}
-                onClick={() => setSelectedCategory(cat.name)}
-                className={`px-5 py-2 rounded-full text-[14px] font-semibold transition-all flex items-center gap-2 ${selectedCategory === cat.name
-                  ? 'bg-white shadow-sm ring-1 ring-black/[0.05]'
-                  : 'bg-white/50 text-[#8E8E93] border border-black/[0.02]'
+                onClick={() => setSelectedCategory(null)}
+                className={`px-5 py-2 rounded-full text-[14px] font-semibold transition-all ${selectedCategory === null
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-text-main border border-primary/[0.05]'
                   }`}
-                style={{
-                  color: selectedCategory === cat.name ? cat.color : '#8E8E93'
-                }}
               >
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: cat.color }}
-                />
-                {cat.name}
+                الكل
               </button>
-            ))}
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.name}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`px-5 py-2 rounded-full text-[14px] font-semibold transition-all flex items-center gap-2 ${selectedCategory === cat.name
+                    ? 'bg-white shadow-sm ring-1 ring-black/[0.05]'
+                    : 'bg-white/50 text-[#8E8E93] border border-black/[0.02]'
+                    }`}
+                  style={{
+                    color: selectedCategory === cat.name ? cat.color : '#8E8E93'
+                  }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 

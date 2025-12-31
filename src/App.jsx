@@ -45,8 +45,12 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
               duration: 0.35,
               ease: [0.32, 0.72, 0, 1] // Apple's default ease curve
             }}
-            className="min-h-full"
-            style={{ backgroundColor: 'var(--bg-system)' }}
+            className="w-full"
+            style={{
+              backgroundColor: 'var(--bg-system)',
+              // Force min-height to be slightly larger than 100% to ensure rubber-band bounce always works
+              minHeight: 'calc(100% + 1px)'
+            }}
           >
             {currentView === 'add' && <AddTask setCurrentView={setCurrentView} />}
             {currentView === 'settings' && <Settings setCurrentView={setCurrentView} />}
