@@ -81,7 +81,7 @@ const AddTask = ({ setCurrentView }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] flex flex-col">
+    <div className="bg-[#F2F2F7] flex flex-col bounce-padding">
       {/* iOS Navigation Bar */}
       <header className="sticky top-0 z-50 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-primary/[0.05]">
         <div className="h-14 px-4 flex items-center justify-between">
@@ -102,7 +102,7 @@ const AddTask = ({ setCurrentView }) => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 py-8 space-y-7 max-w-xl mx-auto w-full">
+      <main className="flex-1 px-4 py-8 space-y-7 max-w-xl mx-auto w-full">
         {/* Error State */}
         <AnimatePresence>
           {error && (

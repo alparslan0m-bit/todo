@@ -59,7 +59,7 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
   const GreetingIcon = greeting.icon;
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] pb-32">
+    <div className="bg-[#F2F2F7] pb-32 bounce-padding">
       {/* iOS Status Bar & Top Actions */}
       <header className="sticky top-0 z-40 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-black/[0.03]">
         <div className="pt-safe-top h-14 px-5 flex items-center justify-between">
@@ -91,8 +91,8 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
           <p className="text-[15px] font-medium text-text-secondary">لديك {incompleteTasks.length} مهام متبقية</p>
         </section>
 
-        {/* Category Filter Pills - Apple Style */}
-        <section className="mb-8 overflow-x-auto no-scrollbar mask-gradient-right px-6">
+        {/* Category Filter Pills - Apple Style with Scroll Snap */}
+        <section className="mb-8 overflow-x-auto no-scrollbar scroll-snap-x mask-gradient-right px-6">
           <div className="flex gap-2.5 min-w-max">
             <button
               onClick={() => setSelectedCategory(null)}

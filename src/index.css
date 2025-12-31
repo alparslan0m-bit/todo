@@ -47,6 +47,13 @@
   outline: none;
 }
 
+html {
+  /* Full height for proper viewport */
+  height: 100%;
+  /* CRITICAL: Allow content to scroll naturally */
+  overflow: visible;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -56,28 +63,42 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior-y: none;
   direction: rtl;
   user-select: none;
   -webkit-user-select: none;
+  height: 100%;
+  /* CRITICAL: Allow native iOS bounce - don't block it! */
+  overflow: visible;
+  overscroll-behavior: auto;
 }
 
-/* 📱 Native Viewport Architecture */
+/* 📱 Native Viewport Architecture - Apple-style Scroll Container */
 .app-viewport {
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  /* CRITICAL: Don't block scroll propagation */
+  overflow: visible;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-system);
 }
 
+/* 🍎 THE SINGLE SCROLL CONTAINER - All scrolling happens here */
 .page-wrapper {
   position: relative;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
+  /* Use scroll, not auto, for consistent momentum */
   overflow-x: hidden;
+  /* iOS momentum scrolling - the magic sauce */
   -webkit-overflow-scrolling: touch;
+  /* CRITICAL: Allow elastic bounce at boundaries */
+  overscroll-behavior-y: auto;
+  /* Hardware acceleration for 60fps scrolling */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+  /* Smooth scroll for programmatic scrolling only */
   scroll-behavior: smooth;
 }
 
@@ -164,4 +185,108 @@ h3 {
 
 .animate-reveal {
   animation: ios-reveal 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+
+/* 🍎 Apple Native Scroll Behavior */
+/* Horizontal momentum scroll with snap for category filters */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.scroll-snap-x>* {
+  scroll-snap-align: start;
+}
+
+/* Ensure smooth momentum and bounce on all scrollable areas */
+[class*="overflow-y-auto"],
+[class*="overflow-x-auto"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improved scroll container with native feel */
+.native-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
+  /* Use hardware acceleration for smoother scrolling */
+  will-change: scroll-position;
+  transform: translateZ(0);
+}
+
+/* Horizontal scroll with fade mask - Apple style */
+.mask-gradient-right {
+  mask-image: linear-gradient(to left, transparent 0%, black 10%, black 100%);
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, black 10%, black 100%);
+}
+
+/* Prevent content from shifting during bounce */
+.scroll-stable {
+  overflow-anchor: auto;
+}
+
+/* iOS-style spring physics for interactive elements */
+.spring-press {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spring-press:active {
+  transform: scale(0.97);
+}
+
+/* Smooth vertical scroll with inertia */
+@supports (-webkit-touch-callout: none) {
+
+  /* iOS-specific optimizations */
+  .page-wrapper {
+    /* Enhanced iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent rubber-band on fixed elements */
+  .sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+/* Ensure root element allows native bounce */
+#root {
+  height: 100%;
+  /* CRITICAL: Don't block bounce - let page-wrapper handle all scrolling */
+  overflow: visible;
+}
+
+/* 🍎 Apple Elastic Bounce Enhancement */
+/* Add extra padding at bottom to allow visible bounce */
+.bounce-padding {
+  padding-bottom: 60px;
+}
+
+/* Prevent double-scroll on nested elements */
+.scroll-child {
+  overflow: visible !important;
+  min-height: auto !important;
+}
+
+/* iOS Rubber-band visual enhancement */
+@supports (-webkit-touch-callout: none) {
+
+  /* iOS only: ensure smooth deceleration curve */
+  .page-wrapper {
+    scroll-snap-type: none;
+    /* Don't snap during bounce */
+  }
+
+  /* Pull-to-refresh visual area */
+  .page-wrapper::before {
+    content: '';
+    display: block;
+    height: 0;
+    /* This creates space for the bounce to be visible */
+  }
 }
