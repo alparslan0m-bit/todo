@@ -51,9 +51,9 @@ const Settings = ({ setCurrentView }) => {
   );
 
   return (
-    <div className="bg-[#F2F2F7] flex flex-col bounce-padding">
+    <div className="bg-[#F2F2F7] flex flex-col pb-32">
       {/* iOS Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-primary/[0.05]">
+      <header className="sticky top-0 z-50 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-primary/[0.05] pt-safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
           <div className="w-16" /> {/* Spacer */}
           <h1 className="text-[17px] font-semibold text-text-main">الإعدادات</h1>
