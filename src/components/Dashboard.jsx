@@ -93,7 +93,7 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
 
         {/* Category Filter Pills - Apple Style with Scroll Snap */}
         <section className="mb-8">
-          <div className="overflow-x-auto no-scrollbar scroll-snap-x" style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-y' }}>
+          <div className="overflow-x-auto no-scrollbar scroll-snap-x" style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-x pan-y' }}>
             <div className="flex gap-2.5 min-w-max px-6">
               <button
                 onClick={() => setSelectedCategory(null)}
