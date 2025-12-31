@@ -67,9 +67,11 @@ body {
   user-select: none;
   -webkit-user-select: none;
   height: 100%;
-  /* CRITICAL: Allow native iOS bounce - don't block it! */
-  overflow: visible;
-  overscroll-behavior: auto;
+  /* CRITICAL: Prevent body scroll and pull-to-refresh */
+  overflow: hidden;
+  overscroll-behavior-y: none;
+  position: fixed;
+  width: 100%;
 }
 
 /* 📱 Native Viewport Architecture - Apple-style Scroll Container */
@@ -87,13 +89,12 @@ body {
 .page-wrapper {
   position: relative;
   flex: 1;
-  overflow-y: scroll;
-  /* Use scroll, not auto, for consistent momentum */
+  overflow-y: auto;
   overflow-x: hidden;
   /* iOS momentum scrolling - the magic sauce */
   -webkit-overflow-scrolling: touch;
-  /* CRITICAL: Allow elastic bounce at boundaries */
-  overscroll-behavior-y: auto;
+  /* CRITICAL: Contain scroll to prevent pull-to-refresh but allow bounce */
+  overscroll-behavior-y: contain;
   /* Hardware acceleration for 60fps scrolling */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
@@ -281,12 +282,62 @@ h3 {
     scroll-snap-type: none;
     /* Don't snap during bounce */
   }
+}
 
-  /* Pull-to-refresh visual area */
+/* 📱 iOS Standalone PWA - Disable Pull-to-Refresh, Keep Rubber Band */
+@media all and (display-mode: standalone) {
+
+  html,
+  body {
+    /* Fixed positioning prevents pull-to-refresh navigation */
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    /* Absolutely no overscroll on body level */
+    overscroll-behavior: none;
+  }
+
+  #root {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .app-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* The page-wrapper is the ONLY element that scrolls */
+  /* overscroll-behavior: contain prevents navigation but allows rubber band bounce */
+  .page-wrapper {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* contain = allow rubber band bounce but block pull-to-refresh navigation */
+    overscroll-behavior-y: contain;
+    /* Ensure we have a proper scroll container */
+    touch-action: pan-y;
+  }
+
+  /* Rubber band bounce area at top */
   .page-wrapper::before {
     content: '';
     display: block;
-    height: 0;
-    /* This creates space for the bounce to be visible */
+    height: 1px;
+    margin-top: -1px;
+    /* Invisible but creates overscroll space */
+  }
+
+  /* Extra padding at bottom for rubber band effect */
+  .page-wrapper::after {
+    content: '';
+    display: block;
+    height: 1px;
+    /* Ensures bottom bounce has space */
   }
 }

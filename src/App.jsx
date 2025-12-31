@@ -19,6 +19,7 @@ import { initializeStorage } from './utils/storage';
 import { initializeDynamicTheme } from './utils/dynamicTheme';
 import { initializeScrollAnimations, initializeRevealOnScroll } from './utils/scrollAnimations';
 import { addCapabilityClasses, installPolyfills } from './utils/modernCSS';
+import { initPreventPullToRefresh } from './utils/preventPullToRefresh';
 import './index.css';
 
 // Inner component - Single Page View Management (no React Router)
@@ -85,6 +86,9 @@ function App() {
     installPolyfills();
     addCapabilityClasses();
 
+    // Initialize pull-to-refresh prevention for iOS standalone PWA
+    const cleanupPullToRefresh = initPreventPullToRefresh();
+
     // Set app ready immediately after initialization
     setAppReady(true);
 
@@ -104,6 +108,9 @@ function App() {
       window.removeEventListener('appinstalled', handleAppInstalled);
       if (themeObserver) {
         themeObserver.disconnect();
+      }
+      if (cleanupPullToRefresh) {
+        cleanupPullToRefresh();
       }
     };
   }, []);
