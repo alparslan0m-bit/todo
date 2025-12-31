@@ -67,19 +67,17 @@ body {
   user-select: none;
   -webkit-user-select: none;
   height: 100%;
-  /* CRITICAL: Prevent body scroll and pull-to-refresh */
-  overflow: hidden;
-  overscroll-behavior-y: none;
-  position: fixed;
-  width: 100%;
+  /* Allow native iOS bounce in browser mode */
+  overflow: visible;
+  overscroll-behavior: auto;
 }
 
 /* 📱 Native Viewport Architecture - Apple-style Scroll Container */
 .app-viewport {
   position: fixed;
   inset: 0;
-  /* CRITICAL: Don't block scroll propagation */
-  overflow: visible;
+  /* Contain scrolling - page-wrapper handles all scroll */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-system);
@@ -89,18 +87,14 @@ body {
 .page-wrapper {
   position: relative;
   flex: 1;
+  min-height: 0;
+  /* Critical for flex scroll containers */
   overflow-y: auto;
   overflow-x: hidden;
   /* iOS momentum scrolling - the magic sauce */
   -webkit-overflow-scrolling: touch;
   /* CRITICAL: Contain scroll to prevent pull-to-refresh but allow bounce */
   overscroll-behavior-y: contain;
-  /* Hardware acceleration for 60fps scrolling */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: scroll-position;
-  /* Smooth scroll for programmatic scrolling only */
-  scroll-behavior: smooth;
 }
 
 /* 🧊 iOS Glassmorphism Materials */
@@ -285,71 +279,27 @@ h3 {
 }
 
 /* 📱 iOS Standalone PWA - Disable Pull-to-Refresh, Keep Rubber Band */
+/* 
+ * Strategy: Only add overscroll-behavior: contain to page-wrapper
+ * This is the modern CSS solution that:
+ * ✅ Blocks pull-to-refresh navigation
+ * ✅ Keeps rubber band bounce effect
+ * ✅ Doesn't break the layout
+ */
 @media all and (display-mode: standalone) {
 
-  html,
-  body {
-    /* Fixed positioning prevents pull-to-refresh navigation */
-    position: fixed;
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    /* Absolutely no overscroll on body level */
-    overscroll-behavior: none;
-  }
-
-  #root {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  .app-viewport {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* The page-wrapper is the ONLY element that scrolls */
-  /* Keep it in flex flow - don't use position: absolute */
+  /* Just ensure page-wrapper handles all scrolling with containment */
   .page-wrapper {
-    flex: 1;
-    min-height: 0;
-    /* Critical for flex scroll containers */
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* contain = allow rubber band bounce but block pull-to-refresh navigation */
+    /* This is the key property - contain bounce within this element */
     overscroll-behavior-y: contain;
-    /* Ensure proper touch handling */
-    touch-action: pan-y;
+    /* Ensure momentum scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Also target iOS Safari standalone via class (added by JS) */
-html.standalone-pwa,
-html.standalone-pwa body {
-  position: fixed;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  overscroll-behavior: none;
-}
-
-html.standalone-pwa #root {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-}
-
+/* iOS Safari standalone detection via JS class */
+/* navigator.standalone is true for iOS home screen apps */
 html.standalone-pwa .page-wrapper {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }

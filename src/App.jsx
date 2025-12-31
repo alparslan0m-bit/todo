@@ -33,34 +33,32 @@ const AppContent = ({ showModal, setShowModal, appReady, currentView, setCurrent
 
   return (
     <div className="app-viewport" dir="rtl" ref={appShellRef}>
-      <div
-        className="flex-1 flex flex-col relative overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-system)' }}
-      >
-        <div className="page-wrapper no-scrollbar">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, x: currentView === 'home' ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: currentView === 'home' ? 20 : -20 }}
-              transition={{
-                duration: 0.35,
-                ease: [0.32, 0.72, 0, 1] // Apple's default ease curve
-              }}
-              className="min-h-full"
-            >
-              {currentView === 'add' && <AddTask setCurrentView={setCurrentView} />}
-              {currentView === 'settings' && <Settings setCurrentView={setCurrentView} />}
-              {currentView === 'home' && <Dashboard onShowModal={() => setShowModal(true)} setCurrentView={setCurrentView} />}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
-        <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
-        <InstallPrompt />
-        <UpdateToast />
+      {/* Page content - scrollable area */}
+      <div className="page-wrapper no-scrollbar">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, x: currentView === 'home' ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: currentView === 'home' ? 20 : -20 }}
+            transition={{
+              duration: 0.35,
+              ease: [0.32, 0.72, 0, 1] // Apple's default ease curve
+            }}
+            className="min-h-full"
+            style={{ backgroundColor: 'var(--bg-system)' }}
+          >
+            {currentView === 'add' && <AddTask setCurrentView={setCurrentView} />}
+            {currentView === 'settings' && <Settings setCurrentView={setCurrentView} />}
+            {currentView === 'home' && <Dashboard onShowModal={() => setShowModal(true)} setCurrentView={setCurrentView} />}
+          </motion.div>
+        </AnimatePresence>
       </div>
+      {/* Fixed navigation at bottom */}
+      <Navigation currentView={currentView} setCurrentView={setCurrentView} />
+      <TaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <InstallPrompt />
+      <UpdateToast />
     </div>
   );
 };
