@@ -308,36 +308,48 @@ h3 {
     position: fixed;
     inset: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   /* The page-wrapper is the ONLY element that scrolls */
-  /* overscroll-behavior: contain prevents navigation but allows rubber band bounce */
+  /* Keep it in flex flow - don't use position: absolute */
   .page-wrapper {
-    position: absolute;
-    inset: 0;
+    flex: 1;
+    min-height: 0;
+    /* Critical for flex scroll containers */
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     /* contain = allow rubber band bounce but block pull-to-refresh navigation */
     overscroll-behavior-y: contain;
-    /* Ensure we have a proper scroll container */
+    /* Ensure proper touch handling */
     touch-action: pan-y;
   }
+}
 
-  /* Rubber band bounce area at top */
-  .page-wrapper::before {
-    content: '';
-    display: block;
-    height: 1px;
-    margin-top: -1px;
-    /* Invisible but creates overscroll space */
-  }
+/* Also target iOS Safari standalone via class (added by JS) */
+html.standalone-pwa,
+html.standalone-pwa body {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none;
+}
 
-  /* Extra padding at bottom for rubber band effect */
-  .page-wrapper::after {
-    content: '';
-    display: block;
-    height: 1px;
-    /* Ensures bottom bounce has space */
-  }
+html.standalone-pwa #root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+html.standalone-pwa .page-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
