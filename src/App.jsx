@@ -20,6 +20,7 @@ import { initializeDynamicTheme } from './utils/dynamicTheme';
 import { initializeScrollAnimations, initializeRevealOnScroll } from './utils/scrollAnimations';
 import { addCapabilityClasses, installPolyfills } from './utils/modernCSS';
 import { initPreventPullToRefresh } from './utils/preventPullToRefresh';
+import './safe-area.css';
 import './index.css';
 
 // Inner component - Single Page View Management (no React Router)

@@ -61,8 +61,8 @@ const Dashboard = ({ onShowModal, setCurrentView }) => {
   return (
     <div className="bg-[#F2F2F7] pb-32">
       {/* iOS Status Bar & Top Actions */}
-      <header className="sticky top-0 z-40 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-black/[0.03]">
-        <div className="pt-safe-top h-14 px-5 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-black/[0.03] pt-safe-top">
+        <div className="h-14 px-5 flex items-center justify-between">
           <button
             onClick={() => setCurrentView('settings')}
             className="w-10 h-10 rounded-full bg-primary/[0.05] flex items-center justify-center text-text-secondary active:scale-90 transition-transform"
